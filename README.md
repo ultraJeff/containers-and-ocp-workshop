@@ -237,7 +237,7 @@ It is a journey, and we are always happy to help. If you want help along the way
 
 ### 2. Manage Your Containers
 
-#### Part I: Base vs Multi-Layer Images
+#### Part I: Image Layers and Repositories
 
 The goal of this exercise is to understand the difference between base images and multi-layered images (repositories). Also, we'll try to understand the difference between an image layer and a repository.
 
