@@ -1,0 +1,41 @@
+slug: subsystems-container-internals-lab-2-0-part-3
+id: 4firmwc3xvne
+title: Container Registries
+description: |
+  ## Background
+  This lab is focused on understanding what container registries are for and how they work.
+
+  By the end of this lab you should be able to:
+  - Evaluate the quality of a container registry
+  - Evaluate the quality of a container repository
+  - Share your images using public and private registries
+
+  ## Outline
+  - Understanding the basics of trust - quality & provenance
+  - Evaluating four different public registries
+  - Evaluating container repositories - trusted base images
+  - Sharing your container images
+
+  ## Other Material
+  - [Presentation](//goo.gl/pckoxn)
+  - [Lab GitHub Repository](https://github.com/openshift-instruqt/instruqt/tree/6f06eee3386d589c7fdbe67cad5627b681870ef3/instruqt-tracks/subsystems-container-internals-lab-2-0-part-3)
+
+  ## Start Scenario
+  Once you have gone through the presentation, continue to the exercises
+icon: https://logodix.com/logo/1910931.png
+level: intermediate
+tags:
+- openshift
+owner: openshift
+developers:
+- smccarty@redhat.com
+- nvinto@redhat.com
+- ryanj@redhat.com
+- akeenan@redhat.com
+- cclyburn@redhat.com
+sandbox_preset: openshift-411
+lab_config:
+  overlay: false
+  width: 25
+  position: right
+checksum: "3442594201691756916"

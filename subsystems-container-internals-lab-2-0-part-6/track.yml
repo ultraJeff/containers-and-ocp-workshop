@@ -1,0 +1,41 @@
+slug: subsystems-container-internals-lab-2-0-part-6
+id: ihpxr3zijgc9
+title: Container Standards
+description: |
+  ## Background
+  This lab is focused on understanding some of the container standards that govern this space. This will help you better architect your own environments, feeling more confident about where to invest.
+
+  By the end of this lab you should be able to:
+  - Explain the Image, Runtime, and Distribution specifications
+  - Have a basic understanding of the major metadata files
+  - Be able to start a container from scratch
+
+  ## Outline
+  - An overview of the three OCI specifications
+  - The OCI image specification
+  - The OCI runtime specification
+  - The OCI reference implementation of the runtime specification (runc) and how to start a container
+
+  ## Other Material
+  - [Presentation](https://docs.google.com/presentation/d/1fC9cKR2-kFW5l-VEk0Z5_1vriYpROXOXM_5rhyVnBi4/edit#slide=id.g20639ff941_0_42)
+  - [Lab GitHub Repository](https://github.com/openshift-instruqt/instruqt/tree/09022064268036919f5038ca18f6eab5e509f8a8/instruqt-tracks/subsystems-container-internals-lab-2-0-part-6)
+
+  ## Start Scenario
+  Once you have gone through the presentation, continue to the exercises
+icon: https://logodix.com/logo/1910931.png
+level: intermediate
+tags:
+- openshift
+owner: openshift
+developers:
+- smccarty@redhat.com
+- nvinto@redhat.com
+- ryanj@redhat.com
+- akeenan@redhat.com
+- cclyburn@redhat.com
+sandbox_preset: openshift-411
+lab_config:
+  overlay: false
+  width: 25
+  position: right
+checksum: "10697817593149220239"

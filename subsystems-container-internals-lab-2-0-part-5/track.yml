@@ -1,0 +1,44 @@
+slug: subsystems-container-internals-lab-2-0-part-5
+id: a6atvfn5b7th
+title: Container Orchestration
+description: |
+  ## Background
+  This lab is focused on understanding how container images are built, tagged, organized and leveraged to deliver software in a range of use cases.
+
+  By the end of this lab you should be able to:
+  - Understand the uses of multi-container applications
+  - Internalize the difference between orchestration and application definition
+  - Command basic container scaling principles
+  - Use tools to troubleshoot containers in a clustered environment
+
+  ## Outline
+  - Multi-Container Workloads: The classic two-tiered, wordpress application
+  - Cluster Performance: Scaling applications horizontally with containers
+  - Cluster Debugging: Troubleshooting in a distributed systems environment
+
+  ## Other Material
+  This presentation will give you a background to all of the concepts in this lab
+  - [Google Presentation](https://docs.google.com/presentation/d/1S-JqLQ4jatHwEBRUQRiA5WOuCwpTUnxl2d1qRUoTz5g/edit#slide=id.g20639ff941_0_42)
+  - [Lab GitHub Repository](https://github.com/openshift-instruqt/instruqt/tree/b18c330172f3b38042eb22ffca8b24ab32ab3490/instruqt-tracks/subsystems-container-internals-lab-2-0-part-5)
+
+  ## Start Scenario
+  Once you have gone through the presentation, continue to the exercises
+icon: https://logodix.com/logo/1910931.png
+level: intermediate
+tags:
+- openshift
+owner: openshift
+developers:
+- smccarty@redhat.com
+- nvinto@redhat.com
+- akeenan@redhat.com
+- cclyburn@redhat.com
+idle_timeout: 400
+timelimit: 3600
+sandbox_preset: openshift-4-12
+lab_config:
+  overlay: false
+  width: 25
+  position: right
+  loadingMessages: true
+checksum: "12957364313476187864"
