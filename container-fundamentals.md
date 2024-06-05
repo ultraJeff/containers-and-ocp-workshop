@@ -108,13 +108,13 @@ Covering all of this material is beyond the scope of any live training, but we w
 
 Now, let's start with the introductory lab, which covers these four basic primitives:
 
-![New Primitives](./subsystems-container-internals-lab-2-0-part-1/assets/01-new-primitives.png)
+![New Primitives](./assets/subsystems-container-internals-lab-2-0-part-1/assets/01-new-primitives.png)
 
 #### Part II: Container Images
 
 Container images are really just tar files. Seriously, they are tar files, with an associated JSON file. Together we call these an Image Bundle. The on-disk format of this bundle is defined by the [OCI Image Specification](https://github.com/opencontainers/image-spec). All major container engines including Podman, Docker, RKT, CRI-O and containerd build and consume these bundles.
 
-![Container Images](./subsystems-container-internals-lab-2-0-part-1/assets/02-basic-container-image.png)
+![Container Images](./assets/subsystems-container-internals-lab-2-0-part-1/assets/02-basic-container-image.png)
 
 But let's dig into three concepts a little deeper:
 
@@ -138,15 +138,15 @@ podman run -t registry.access.redhat.com/ubi7/ubi cat /etc/redhat-release
 
 Analyzing portability, compatibility, and supportability, we can deduce that a RHEL 7 image will work on RHEL 7 host perfectly. The code in both were designed, compiled, and tested together. The Product Security Team at Red Hat is analyzing CVEs for this combination, performance teams are testing RHEL 7 web servers, with a RHEL 7 kernel, etc, etc. The entire machine of software creation and testing does its work in this configuration with programs and kernels compiled, built and tested together. Matching versions of container images and hosts inherit all of this work:
 
-![Matching Container Image and Host](./subsystems-container-internals-lab-2-0-part-1/assets/02-rhel7-image-rhel7-host.png)
+![Matching Container Image and Host](./assets/subsystems-container-internals-lab-2-0-part-1/assets/02-rhel7-image-rhel7-host.png)
 
 However, there are limits. Red Hat can't guarantee that RHEL 5, Fedora, and Alpine images will work like they were intended to on a RHEL 7 host. The container image standards guarantee that the container engine will be able to ingest the images, pulling them down and caching them locally. But, nobody can guarantee that the binaries in the container images will work correctly. Nobody can guarantee that there won't be strange CVEs that show up because of the version combinations (yeah, that's "a thing"), and of course, nobody can guarantee the performance of the binaries running on a kernel for which it wasn't compiled. That said, many times, these binaries will appear to just work.
 
-![Mismatching Container Image and Host](./subsystems-container-internals-lab-2-0-part-1/assets/02-container-image-host-mismatch.png)
+![Mismatching Container Image and Host](./assets/subsystems-container-internals-lab-2-0-part-1/assets/02-container-image-host-mismatch.png)
 
 This leads us to supportability as a concept separate from portability and compatibility. This is the ability to guarantee to some level that certain images will work on certain hosts. Red Hat can do this between selected major versions of RHEL for the same reason that we can do it with the [RHEL Application Compatibility Guide](https://access.redhat.com/articles/rhel-abi-compatibility). We take special precautions to compile our programs in a way that doesn't break compatibility, we analyze CVEs, and we test performance. A bare minimum of testing, security, and performance can go a long way in ensuring supportability between versions of Linux, but there are limits. One should not expect that container images from RHEL 9, 10, or 11 will run on RHEL 8 hosts.
 
-![Container Image & Host Supportability](./subsystems-container-internals-lab-2-0-part-1/assets/02-container-image-host-supportability.png)
+![Container Image & Host Supportability](./assets/subsystems-container-internals-lab-2-0-part-1/assets/02-container-image-host-supportability.png)
 
 Alright, now that we have sorted out the basics of container images, let's move on to registries...
 
@@ -154,7 +154,7 @@ Alright, now that we have sorted out the basics of container images, let's move 
 
 Registries are really just fancy file servers that help users share container images with each other. The magic of containers is really the ability to find, run, build, share and collaborate with a new packaging format that groups applications and all of their dependencies together.
 
-![Container Registry](./subsystems-container-internals-lab-2-0-part-1/assets/03-basic-container-registry.png)
+![Container Registry](./assets/subsystems-container-internals-lab-2-0-part-1/assets/03-basic-container-registry.png)
 
 Container images make it easy for software builders to package software, as well as provide information about how to run it. Using metadata, software builders can communicate how users *can* and *should* run their software, while providing the flexibility to also build new things based on existing software.
 
@@ -219,7 +219,7 @@ A container runtime is a small tool that expects to be handed two things - a dir
 The kernel is responsible for the last mile of container creation, as well as resource management during its running lifecycle. The container runtime talks to the kernel to create the new container with a special kernel function called clone(). The runtime also handles talking to the kernel to configure things like cgroups, SELinux, and SECCOMP (more on these later). The combination of kernel technologies invoked are defined by the container runtime, but there are very recent [efforts to standardize this in the kernel](https://lwn.net/Articles/780364/).
 
 
-![Container Engine](./subsystems-container-internals-lab-2-0-part-1/assets/04-simple-container-engine.png)
+![Container Engine](./assets/subsystems-container-internals-lab-2-0-part-1/assets/04-simple-container-engine.png)
 
 
 Containers are just regular Linux processes that were started as child processes of a container runtime instead of by a user running commands in a shell. All Linux processes live side by side, whether they are daemons, batch jobs or user commands - the container engine, container runtime, and containers (child processes of the container runtime) are no different. All of these processes make requests to the Linux kernel for protected resources like memory, RAM, TCP sockets, etc.
@@ -251,7 +251,7 @@ Container Orchestration is the next logical progression after you become comfort
 * Operational Automation - The [Kubernetes Operator Framework](https://www.redhat.com/en/topics/containers/what-is-a-kubernetes-operator#operator-framework) can be thought of as a robot systems administrator deployed side by side with applications managing mundane and complex tasks for the application (backups, restores, etc)
 * Higher Level Frameworks - Once you adopt Kubernetes orchestration, you gain access to an innovative ecosystem of tools like Istio, Knative, and the previously mentioned Operator Framework
 
-![Orchestration Node](./subsystems-container-internals-lab-2-0-part-1/assets/05-simple-orchestration-node.png)
+![Orchestration Node](./assets/subsystems-container-internals-lab-2-0-part-1/assets/05-simple-orchestration-node.png)
 
 
 To demonstrate, all we need is bash, curl, and netcat which lets us pipe text across a TCP port. If you are familiar with basic bash scripting, this tiny lab teases apart the value of the orchestration, versus the application itself. This application doesn't do much, but it does demonstrate the power of a two-tier application running in containers with both a database and a web front end. In this lab, we use the same container image from before, but this time we embed the *how* to run logic in the Kubernetes YAML. Here's a simple representation of what our application does:
@@ -302,7 +302,7 @@ Take a moment to note that we could fire up 50 copies of this same application i
 
 In this lab, we have covered container images, registries, hosts, and orchestration as four new primitives you need to learn on your container journey. If you are struggling to understand why you need containers, or why need to move to orchestration - or maybe you are struggling to explain it to your management or others in your team - maybe thinking about it in this context will help:
 
-![Container Journey](./subsystems-container-internals-lab-2-0-part-1/assets/06-journey.png)
+![Container Journey](./assets/subsystems-container-internals-lab-2-0-part-1/assets/06-journey.png)
 
 It is a journey, and we are always happy to help. If you want help along the way, here are some people to follow on Twitter:
 
@@ -2154,7 +2154,7 @@ Check it out here: [UBI 8.0-126 image](https://catalog.redhat.com/software/conta
 Now, let's take a more detailed look, using the oscap-podman command:
 
 ```
-oscap-podman registry.access.redhat.com/ubi8/ubi:8.0-126 oval eval --report ./html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
+oscap-podman registry.access.redhat.com/ubi8/ubi:8.0-126 oval eval --report ./assets/html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
 ```
 
 This will create a report. We've already set up a web server (in a container) so that you can quickly look at the  *OSCAP Report 8.0-126* Tab.
@@ -2162,7 +2162,7 @@ This will create a report. We've already set up a web server (in a container) so
 Notice that there are many orange lines displaying the CVEs/RHSAs. If you built and ran an application on this very old container image, it would be exposed to these vulnerabilities. Now, let's scan the latest version of UBI provided by Red Hat:
 
 ```
-oscap-podman registry.access.redhat.com/ubi8/ubi:latest oval eval --report ./html/ubi-latest-report.html rhel-8.oval.xml.bz2
+oscap-podman registry.access.redhat.com/ubi8/ubi:latest oval eval --report ./assets/html/ubi-latest-report.html rhel-8.oval.xml.bz2
 ```
 
 Look at the new report from thr *OSCAP Report latest* Tab.
@@ -2172,4 +2172,4 @@ In general you should almost never see any unapplied patches in this latest buil
 
 ## Next Up
 
-Congratulations! You just completed the first module of today's workshop. Please continue to [Developing on OpenShift](./developing-on-openshift-getting-started.md).
+Congratulations! You just completed the first module of today's workshop. Please continue to [Developing on OpenShift](./assets/developing-on-openshift-getting-started.md).
