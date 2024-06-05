@@ -1,6 +1,8 @@
 # Getting Started Developing on OpenShift
 
-## Working with the Command Line Interface (CLI)
+## Deploying with an Image
+
+### Working with the Command Line Interface (CLI)
 
 You can access the Red Hat OpenShift CLI with the command `oc`. Using the `oc` command lets you work with the entire OpenShift cluster and deploy new applications.
 
@@ -14,7 +16,7 @@ The CLI exposes the underlying Kubernetes orchestration system with the enhancem
 
 Let's start by logging in with `oc` for your first experience with this CLI.
 
-## Logging in with the CLI
+### Logging in with the CLI
 You log into OpenShift from the command line using the `oc login` command.
 
 ----
@@ -22,7 +24,7 @@ You log into OpenShift from the command line using the `oc login` command.
 `Step 1:` Run the following command in the terminal window to the left:
 
 ```
-oc login -u admin -p admin https://api.crc.testing:6443 --insecure-skip-tls-verify=true
+oc login -u admin -p LAB_PASSWORD LAB_API_ENDPOINT --insecure-skip-tls-verify=true
 ```
 
 Upon successful login, you'll get results similar to the following:
@@ -30,9 +32,9 @@ Upon successful login, you'll get results similar to the following:
 ```
 Login successful.
 
-You have access to 64 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 86 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
-Using project "default".
+Using project "admin-devspaces".
 ```
 
 Running the Linux [`whoami`](https://en.wikipedia.org/wiki/Whoami) command reports the current user and implicitly confirms that the login is successful.
@@ -51,7 +53,7 @@ You'll get the following results:
 admin
 ```
 
-## Congratulations!
+### Congratulations!
 
  You've logged in to OpenShift using the `oc` command line tool.
 
@@ -59,7 +61,7 @@ admin
 
 This topic focuses on learning how to log into the Red Hat OpenShift web console and then create an application once logged in.
 
-## Logging in with the web console
+### Logging in with the web console
 
 Your first task is to log into OpenShift from the web console.
 
@@ -70,7 +72,7 @@ Click the **Web Console** tab from the horizontal menu bar over the terminal to 
 
 You will be presented with the OpenShift login screen. Use the following credentials to log in.
 * **Username:** `admin`
-* **Password:** `admin`
+* **Password:** `<LAB_PASSWORD>`
 
 Log into the OpenShift web console, as shown in the figure below.
 
@@ -96,7 +98,7 @@ You need to change the perspective from **Administrator** to **Developer**.
 
 Now that you're in the **Developer** perspective, let's take a moment to discuss the concept of a **project** in OpenShift.
 
-## Understanding projects in OpenShift
+### Understanding projects in OpenShift
 
 OpenShift is often referred to as a container application platform in that it's a platform designed for the development and deployment of applications in [Linux containers](https://developers.redhat.com/topics/containers).
 
@@ -106,7 +108,7 @@ You can think of a **project** as a visualization of the Kubernetes namespace ba
 
 Now, let's create a project.
 
-## Creating a project
+### Creating a project
 
 In this section you will create a project using the OpenShift web console.
 
@@ -169,7 +171,7 @@ You will spend most of your time in the remainder of this tutorial in that persp
 
 You are now ready to scale the application up and down.
 
-## Congratulations!
+### Congratulations!
 
  You deployed an application from a container image using the OpenShift web console.
 
@@ -179,7 +181,7 @@ In this step, you will learn how to scale your application up by creating multip
 
 The benefit of replicating a pod is that it increases the amount of Internet traffic the application can accommodate. The result is better overall performance.
 
-## Scaling up the application
+### Scaling up the application
 
 You will scale up the application up to 2 replicas.
 
@@ -199,7 +201,7 @@ The figure below illustrates selecting the **Details** and increasing the number
 
 You are now running two replicas of the application.
 
-## Verifying the number of replicas
+### Verifying the number of replicas
 
 ----
 
@@ -209,7 +211,7 @@ You are now running two replicas of the application.
 
 You can see that we now have 2 replicas. Now, let's take a look at OpenShift's self-healing feature. Self Healing ensures that the number of pods you declare for your application is always running.
 
-# Understanding application "self healing"
+### Understanding application "self healing"
 
 Under the OpenShift application **Deployments** are constantly monitored to see that the desired number of pods are actually running. Therefore, if the actual state ever deviates from the desired state--for example, if a pod goes down--OpenShift will fix the situation.
 
@@ -233,7 +235,7 @@ After deleting the pod, you will be taken to a page listing pods. Notice that ev
 
 A replacement pod was created because OpenShift will always make sure that when a pod dies, it creates a new pod to fill its place.
 
-# Scaling down an application
+### Scaling down an application
 
 Before we continue, go ahead and scale your application down to a single instance.
 
@@ -249,7 +251,7 @@ Before we continue, go ahead and scale your application down to a single instanc
 
 ![Reset pod count](./assets/developing-on-openshift-getting-started/assets/reset-pod-count.jpg)
 
-## Congratulations!
+### Congratulations!
 
  You've learned how to use the OpenShift web console to scale the number of replica pods for an application up and down.
 
@@ -265,7 +267,7 @@ The formal name for the resource which represents the routing layer is called a 
 
 As mentioned earlier in the tutorial, When you create an application from a **container image**, OpenShift creates a **route** for the application automatically. Let's take a look at where the **route** is published. Then, let's access the application's website from a browser using its route URL.
 
-## Viewing a route's URL
+### Viewing a route's URL
 
 
 `Step 1:` To view the **route** for your application, make sure you are in the **Developer** perspective by selecting **Developer** from the dropdown list on the left side menu bar. Then from within **Topology** view, click the application circle as shown in the figure below.
@@ -290,7 +292,7 @@ The route URL for your application is shown as a link.
 
 `Step 4:` Click that link to load the application's web page in your browser.
 
-## Accessing a Route's URL
+### Accessing a Route's URL
 
 You can also access an application's **route** URL directly within the application's circular graphic in the **Topology** page.
 
@@ -306,356 +308,368 @@ Clicking the icon opens the application's web page in a browser as shown in th f
 
 ----
 
-## Congratulations!
+### Congratulations!
 
  You have now located the application's **route** URL in the OpenShift web console. Also, you've learned how to open the application in a web page from the **Resource** tab in the application detail, and also directly from the application's circular graphic in the **Topology** view.
 
 This is the final step in this track.
 
-## Workshop within a Workshop
+## Deploying with a Helm Chart
 
-## Understand Container Orchestration
+At the end of this section you will be able to:
+- Use `helm` CLI
+- Install `helm repository`
+- Search, install and uninstall `Helm Charts`
+- Review Helm Charts from `OpenShift Console`
 
-### Multi-Container Workloads: The classic two-tiered, wordpress application
+### Helm Command Line Interface (CLI)
 
-The goal of this exercise is to build a containerized two tier application in an OpenShift cluster. This application will help you learn about clustered containers and distributed systems. It will teach you about Kubernetes and how it operates with the principles of "defined state" and "actual state" - it constantly monitors the environment and attempts to make the actual state match the defined state.
+In this scenario you will find the Helm CLI already installed for you, which can be  also retrieved from OpenShift Console, top right corner, click on ? -> Command Line Tools.
 
-In Kubernetes/OpenShift, applications are defined with either JSON or YAML files - either file format can be imported or exported, even converting between the two. In this lab, we will use YAML files.
+The CLI is the entry point for any interaction with Helm 3 subsystem. In addition to that, OpenShift Developer Catalog, which is the central hub for all developer content, has support for Helm Charts in addition to Operator-backed services, Templates, etc.
 
-Essentially, the application definition files are a collection of software defined objects in Kubernetes. The objects in the file are imported and become defined state for the application. Important objects include:
+When a user instructs the Helm CLI to install a Helm Chart, the information about the Helm Chart is fetched from the repository, rendered on the client and then applied to Kubernetes while a record of this installation is created within the namespace (which is known as a Release).
 
-- Pods: Collections of one or more containers
-- ReplicationControllers: Ensure that the correct number of pods are running.
-- Services: Internal object which represents the port/daemon/program running.
-- Routes: Expose services to the external world.
-- PeristentVolumeClaims: Represents the request for storage and how much. Typically defined in the application by the developer or architect.
-- PersistentVolume: Represents the actual storage. Typically defined by sysadmins or automation.
+![Helm on OpenShift](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/developing-on-openshift/helm/helm-diagram.png)
 
-Developers and architects can group these objects/resources in a single file to make sharing and deployment of the entire application easier. These definitions can be stored in version control systems just like code. Let's inspect some of the Kubernetes resource definitions we will use for this lab.
 
-First, create a new OpenShift project:
+### Creating a New Project
 
-```
-oc new-project myproject
-```
-
-Now look at the objects/resources that define the application:
+Let's create a new OpenShift Project to have a namespace for our helm charts to work with.
 
 ```
-cat ~/labs/wordpress-demo/wordpress-objects.yaml
+oc new-project helm
 ```
 
-Notice there are two Services defined - one for MySQL and one for Wordpress. This allows these two Services to scale independently. The front end can scale with web traffic demand. The MySQL service could also be made to scale with a technology like Galera, but would require special care. You may also notice that even though there are two Services, there is only a single Route in this definition. That's because Services are internal to the Kubernetes cluster, while Routes expose the service externally. We only want to expose our Web Server externally, not our database.
-
-Containers are ephemeral which means their storage is deleted and recreated every time they restart. MySQL tables and the Apacheweb root need storage because we don't want our website data deleted every time a container restarts. To do this, we will define Persistent Volumes in Kubernetes. We will create four persistent volumes - two that have 1GB of storage and two that will have 2GB of storage. In this lab environment, these persistent volumes will reside on the local all-in-one installation, but in a production environment they could reside on shared storage and be accessed from any node in the Kubernetes/OpenShift cluster. In a production environment, they could also be dynamically provisioned with the appropriate resiliency (Gluster, Ceph, AWS EBS Volumes, NFS, iSCSI, others):
-
-```
-cat ~/labs/wordpress-demo/persistent-volumes.yaml
-```
-
-This host has been initialized with some already available PVs:
+### Exercise: Explore CLI
+Let's get started by using `helm` getting CLI version :
 
 ```
-oc get pv
+helm version
 ```
 
-Notice that the persistent volumes are unbound. They are available and waiting, but will not be utilized until you define an application which consumes storage. This is inline with the way Kubernetes constantly tries to drive the actual state toward the defined state. Currently, there is no definition to consume this storage.
+This should confirm we are using **Helm 3**.
 
+As discussed in the previous step, Helm Charts are available through repositories, and those can be pre-installed or installable by the user.
 
-Now, let's instantiate our two tier web application with a single command. This single command can be thought of as an API call which tells Kubernetes the desired state or defined state which it will use as a guide:
+You can search for Helm Charts available in any public repositories through [Helm Hub](https://hub.helm.sh/).
 
-```
-oc create -f ~/labs/wordpress-demo/wordpress-objects.yaml
-```
-
-Look at the status of the application. The two pods that make up this application will remain in a "pending" state - why? Kubernetes will connect the Persistent Volume Claims with the available Persistent Volumes, pull images, and schedule the pods to a node. Keep running these commands until the pods start:
+For instance, searching Helm Charts for [NGINX](https://nginx.com):
 
 ```
-oc describe pod wordpress-
+helm search hub nginx
 ```
 
-```
-oc describe pod mysql-
-```
+This will give a list of available charts from multiple repositories. If we want to install it, we need to have such repositories configured.
 
-Now, the persistent volume claims for the application will become Bound and satisfy the storage requirements. Kubernetes/OpenShift will now start to converge the defined state and the actual state:
+By default the list of available repositories is empty. You can add a new one with the CLI. For NGINX, add Bitnami repository:
 
 ```
-oc get pvc
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
-Also, take a look at the Persistent Volumes again:
+Once added, verify it is present:
 
 ```
-oc get pv
+helm repo list
 ```
 
-You may notice the wordpress pod enter a state called CrashLoopBackOff. This is a natural state in Kubernetes/OpenShift which helps satisfy dependencies. The wordpress pod will not start until the mysql pod is up and running. This makes sense, because wordpress can't run until it has a database and a connection to it. Similar to email retries, Kubernetes will back off and attempt to restart the pod again after a short time. Kubernetes will try several times, extending the time between tries until eventually the dependency is satisfied, or it enters an Error state. Luckily, once the mysql pod comes up, wordpress will come up successfully. Here are some useful commands to watch the state:
+You can search for Helm Charts also inside repos, like in the one you just installed:
 
-Show all pods. You may run this command several times waiting for the actual state to converge with the defined state:
+```
+helm search repo bitnami/nginx
+```
+
+### Deploy a Helm Chart
+
+You can use `helm install` command to deploy your charts and start managing revisions.
+
+To install [NGINX Chart](https://hub.helm.sh/charts/bitnami/nginx):
+
+```
+helm install my-nginx bitnami/nginx --set service.type=ClusterIP
+```
+
+This will install `nginx`, and for this example, we want to use `ClusterIP` Service type because we want to expose it afterwards through an OpenShift `Route`.
+
+Check your Helm releases:
+
+```
+helm ls
+```
+
+Verify all the pods are in Running state and Ready:
 
 ```
 oc get pods
 ```
 
-View the events for a pod. You may run these commands several times waiting for the actual state to converge with the defined state:
+Now expose `my-nginx` service to access it via OpenShift `Route`:
 
 ```
-oc describe pod mysql-
+oc expose svc/my-nginx
 ```
 
-```
-oc describe pod wordpress-
-```
-
-Once the pods are scheduled and running, view the terminal output for each pod:
+Verify that route has been created:
 
 ```
-oc logs $(oc get pods | grep mysql- | awk '{print $1}')
+oc get routes
 ```
 
-```
-oc logs $(oc get pods | grep wordpress- | awk '{print $1}')
-```
+You can click on the generated host to access the NGINX Pod provided by your just installed Helm Chart, or you can do it from OpenShift Console.
 
-Finally, ensure that the web interface is up and running. The following curl/grep/awk command will show us the HTML returned form the webserver, letting us know that wordpress is up and running.
+### Verify the deployment from OpenShift Console
 
-```
-curl http://$(oc get svc | grep wpfrontend | awk '{print $3}')/wp-admin/install.php
-```
+To verify the creation of the resources generated by the Helm Chart, you can head out to the OpenShift web console.
 
-Think about it, we just instantiated a fairly complex, multi-service application with a single command and pre-defined state in the YAML files. This is extremely powerful and can be used to construct complex applications with 10, 20, 30 or 100 services.
+Make sure the Developer perspective from the dropdown in the top left corner of the web console is selected as shown below:
 
-In this exercise you learned how to deploy a fully functional two tier application with a single command (oc create). As long as the cluster has persistent volumes available to satisify the application, an end user can do this on their laptop, in a development environment or in production data centers all over the world. All of the dependent code is packaged up and delivered in the container images - all of the data and configuration comes from the environment. Production instances will access production persistent volumes, development environments can be seeded with copies of production data, etc. It's easy to see why container orchestration is so powerful.
+<img src="https://katacoda.com/embed/openshift/courses/assets/middleware/pipelines/developer-view.png" width="800" />
 
-### Inspecting & Troubleshooting: Using the OpenShift web interface
+Next, select the Project dropdown menu shown below and choose `helm` project you have been working with.
 
-In the last step, you created a multi-tier web application. Now, log into the OpenShift web interface which is a convenient place to monitor the state, and troubleshoot things when they go wrong. You can even get a debug terminal into a Pod to troubleshoot if it crashes. This can help you figure out why it crashed. This shouldn't happen in this lab, but as you build applications it surely will. Also, feel free to delete a pod and see what happens. Kubernetes will see that the defined state and actual state no longer match and will recreate it. This is useful when things are taking too long :-)
+Next, click on the Topology tab on the left side of the web console if you don't see what's in the image below. Once in the Topology view, you can see the Deployment for `my-nginx` application and you can access it by clicking on the URL generated by the OpenShift Route:
 
-Access the OpenShift Web Console to login from the Web UI:
-```
-oc get routes console -n openshift-console -o jsonpath='{"https://"}{.spec.host}{"\n"}'
-```
-Copy the URL from the output of the above command and open it in your browser.
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/nginx-helm-chart-route.png" width="800" />
 
-We'll deploy our app as the `admin` user. Use the following credentials:
-* Username:
+You'll notice the HR label and Helm icon below, this means that this application is managed by Helm, and you can overview Helm `Releases` for this app from left side menu, Helm section:
 
-```
-admin
-```
-* Password:
-```
-admin
-```
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/nginx-helm-releases.png" width="800" />
 
-Here are some useful locations to investigate what is happening. From `myproject` project, go to the "Events" section. It is useful early in the Pod creation process, when its being scheduled in the cluster and then when the container image is being pulled. Later in the process when a Pod is crashing because of something in the container image itself, its useful to watch the terminal output in the "Logs" section. It can also be useful to run commands live in a Terminal. Sometimes a Pod won't start, so it's useful poke around with using the "Debug in Terminal" section. Get a feel in the following areas of the interface.
+Explore all `Resources` that are associated with a particular Helm `Release`, click on `my-nginx` Helm Release and then click on `Resouces` tab:
 
-First check out the MySQL Pod:
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/nginx-helm-resources-view.png" width="800" />
 
-- Workloads -> Pods -> mysql-<id> -> Details
-- Workloads -> Pods -> mysql-<id> -> Events
-- Workloads -> Pods -> mysql-<id> -> Logs
-- Workloads -> Pods -> mysql-<id> -> Terminal
+### Uninstall and clean
 
-Do the same for Wordpress:
+Come back to Terminal clicking on Terminal tab.
 
-- Workloads -> Pods -> wordpress-<id> -> Details
-- Workloads -> Pods -> wordpress-<id> -> Events
-- Workloads -> Pods -> wordpress-<id> -> Logs
-- Workloads -> Pods -> wordpress-<id> -> Terminal
-
-Once you've spent some time in the web interface, move on to the next lab.
-
-### Cluster Performance: Scaling applications horizontally with containers
-
-In this exercise, you will scale and load test a distributed application using a tool called Apache Bench. Apache Bench (ab command) is a tool for benchmarking HTTP servers. It is designed to give you an impression of how your current Apache installation perform. In particular ab shows you how many requests per second your Apache installation is capable of serving. The ab tool is especially useful with a Kubernetes cluster, where you can scale up web servers with a single command and provide more capacity to handle more requests per second.
-
-Before we test, copy the URL address to connect to for several tests:
+Uninstall `my-nginx` release:
 
 ```
-echo "http://$(oc get svc | grep wpfrontend | awk '{print $3}')/wp-admin/install.php"
+helm uninstall my-nginx
 ```
 
-From *Terminal 2*, start toolbox to install AB benchmarking tool from Apache Tools inside a container:
+Delete previously created `route`:
 
 ```
-toolbox
+oc delete route my-nginx
 ```
 
-Install AB:
+## Create Your First Helm Chart
+
+At the end of this section you will be able to:
+- Create your own `Helm Chart`
+- Understand `Helm Templates`
+- Understand Helm integrations with `Kubernetes`
+
+
+After having discovered `helm` CLI to install and manage Helm Charts, we can now create our first one from scratch. Before doing that, let's review the core concepts from [official documentation](https://helm.sh/docs/topics/charts/):
+
+- A `Chart` is a Helm package. It contains all of the resource definitions necessary to run an application, tool, or service inside of a Kubernetes cluster.
+- A `Repository` is the place where charts can be collected and shared.
+- A `Release` is an instance of a chart running in a Kubernetes cluster-
+
+
+Helm uses a packaging format called charts. A chart is a collection of files that describe a related set of Kubernetes resources, and it organized as a collection of files inside of a directory. The directory name is the name of the chart.
+
+## Creating a new Helm Chart
+
+Navigate to `/root` directory:
 
 ```
-dnf install -y httpd-tools
+cd /root
 ```
 
-Copy the URL from the Terminal 1 into an environment variable so we can use it multiple times:
+With `helm create` command you can create a chart directory along with the common files and directories used in a chart.
+
+An Helm chart called `my-chart` has been already generated with the following command:
+
+`helm create my-chart`
+
+
+Inside `my-chart/` folder you will find the following files, you can also review them from the **Visual Editor** Tab.
 
 ```
-export SITE=<URL_COPIED>
+cd my-chart
+ls -la
 ```
 
-Test with ab before we scale the application to get a base line. Take note of the "Time taken for tests" section:
+* `Chart.yaml`: is a YAML file containing multiple fields describing the chart
+* `values.yaml`:: is a YAML file containing default values for a chart, those may be overridden by users during helm install or helm upgrade.
+* `templates/NOTES.txt`: text to be displayed to your users when they run helm install.
+* `templates/deployment.yaml`: a basic manifest for creating a Kubernetes deployment
+* `templates/service.yaml`: a basic manifest for creating a service endpoint for your deployment
+* `templates/_helpers.tpl`: a place to put template helpers that you can re-use throughout the chart
 
+This command generates a skeleton of your Helm Chart, and by default there is an NGINX image as example:
+
+
+**1. Chart description**
+
+Let's review our `Chart.yaml`. This contains `version` of the package and `appVersion` that we are managing, typically this can be refered to a container image tag.
+
+**2. Fill chart with custom values**
+
+In our example, we are working on a Helm Template `templates/deployment.yaml` describing a Kubernetes Deployment for our app, containing this structure for `spec.containers.image`:
+
+`image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"`
+
+> **Note:** *By default `appVersion` from `Chart.yaml` is used as image tag*
+
+In `values.yaml` add `image.repository` variable to define the container image for our chart.
+
+From the **Visual Editor** Tab, open `values.yaml` file and add this line after the `# TODO: image repository` comment:
+
+```yaml
+repository: bitnami/nginx
 ```
-ab -n10 -c 3 -k -H "Accept-Encoding: gzip, deflate" $SITE
-```
 
+Now let's define which tag to use for this container image.
+Add this line after the `# TODO: image tag"` comment:
 
-Take note of the following sections in the output:
-
-- Time taken for tests
-- Requests per second
-- Percentage of the requests served within a certain time (ms)
-
-
-Go to the web interface. Scale the Wordpress Deployment up to three containers. Click the up arrow:
-
-- Workloads -> Deployments -> wordpress -> Up Arrow
-
-
-Test with ab again. How did this affect our benchmarking and why?
-
-```
-ab -n10 -c 3 -k -H "Accept-Encoding: gzip, deflate" $SITE
-```
-
-Come back in *Terminal 1*, now lets scale up more with command line instead of the web interface:
-
-```
-oc scale --replicas=5 rc/wordpress
-```
-
-
-Come back to *Terminal 2* to test with ab. How did this affect our benchmarking and why?
-
-```
-ab -n10 -c 3 -k -H "Accept-Encoding: gzip, deflate" $SITE
+```yaml
+tag: latest
 ```
 
 
-In *Terminal 1*, scale the application back down to one pod:
+**3. Install**
+
+Install our custom Helm Chart from local folder.
 
 ```
-oc scale --replicas=1 rc/wordpress
+cd /root
+helm install my-chart ./my-chart
 ```
 
-From *Terminal 2*, test with ab. How did this affect our benchmarking and why?
-
-```
-ab -n10 -c 3 -k -H "Accept-Encoding: gzip, deflate" $SITE
-```
-
-Counter intuitively, you may have seen slower response times when you scaled the pods up. This is probably because we are running Kubernetes on a single node. The requests are bing sent through a reverse proxy and distributed to multiple pods all running on the same server for this lab. If this were a real OpenShift cluster with 100s or 1000s of nodes, you may have seen scale out performance where response times went down.
-
-Sometimes horizontal scaling can have counter intuitive effects. Sometimes great care must be taken with applications to get the performance characteristics that we need. The world of container orchestration opens up an entirely new kind of performance tuning and you will need new skills to tackle this challenge.
-
-### Distributed Debugging: Troubleshooting in a distributed systems environment
-
-The goal of this exercise is to understand the nature of a distributed systems environment with containers. Quickly and easily troubleshooting problems in containers requires distributed systems thinking. You have to think of things programatically. You can't just ssh into a server and understand the problem. You can execute commands in a single pod, but even that might prevent you from troubleshooting things like network, or database connection errors which are specific to only certain nodes. This can happen because of persnickety differences in locations of your compute nodes in a cloud environment or code that only fails in unforeseen ways at scale or under load.
-
-We are going to simulate one of these problems by using a specially designed test application. In this exercise we will learn how to figure things out quickly and easily.
-
-Inspect each of the files and try to understand them a bit:
-
-```
-cat ~/labs/goodbad/Build.yaml
-```
-
-```
-cat ~/labs/goodbad/Run.yaml
-```
-
-
-Build the test application. **Wait** for the build to successfully complete. You can watch the log output in the OpenShift web interface.
-
-```
-oc create -f ~/labs/goodbad/Build.yaml
-```
-
-
-```
-oc get builds
-```
+This will install NGINX like in previous chapter, and we can follow installation like in previous chapter, either from Terminal or OpenShift Console:
 
 ```
 oc get pods
 ```
 
-You can watch the logs like this. Keep running the following command until you see "Push successful" in the logs:
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/my-chart-helm-chart.png" width="800" />
+
+Review installed revision:
 
 ```
-oc logs goodbad-1-build
+helm ls
 ```
 
-When the above build completes, run the test application:
+In next chapter we will add an OpenShift Route as a Helm Template, like for `Service`, to be published in a new revision.
 
-```
-oc create -f ~/labs/goodbad/Run.yaml
-```
+## Managing Helm Revisions in OpenShift
 
+At the end of this section you will be able to:
+- Manage multiple `Helm Revisions` for your Helm Chart
+- `Upgrade` revisions for new changes
+- Revert changes with `Rollback` of revisions
 
-Get the IP address for the goodbad service
+### Upgrade revisions
 
-```
-oc get svc
-```
+When we install a Helm Chart on OpenShift, we publish a release into the cluster that we can control in terms of upgrades and rollbacks.
 
-Now test the cluster IP with curl. Use the cluster IP address so that the traffic is balanced among the active pods. You will notice some errors in your responses. You may also test with a browser. Some of the pods are different - how could this be? They should be identical because they were built from code right?
+To change something in any already published chart, we can use `helm upgrade` command with new parameters or code from our chart.
 
-```
-SVC_IP=$(oc get svc | grep goodbad | awk '{print $3}')
-for i in {1..20}; do curl $SVC_IP; done
-```
+### Add OpenShift Route as Template
 
-Example output:
+From the Visual Editor, create a new template for OpenShift Route in `templates` directory. From the `templates` directory, create a new file called `routes.yaml`. Copy the following content to that file:
 
-```
-ERROR
-ERROR
-Hello World
-ERROR
-```
-
-Take a look at the code. A random number is generated in the entry point and written to a file in /var/www/html/goodbad.txt:
-
-```
-cat ~/labs/goodbad/index.php
-```
-
-```
-cat ~/labs/goodbad/Dockerfile
+```yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "my-chart.fullname" . }}
+  labels:
+    {{- include "my-chart.labels" . | nindent 4 }}
+spec:
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: {{ include "my-chart.fullname" . }}
+    weight: 100
+  wildcardPolicy: None
 ```
 
-Troubleshoot the problem in a programmatic way. Notice some pods have files which contain numbers that are lower than 7, this means the pod will return a bad response:
+Run `helm upgrade` to publish a new revision containing a `my-charm` Route:
 
 ```
-for i in $(oc get pods | grep goodbad | grep -v build | awk '{print $1}'); do oc exec -t $i -- cat /var/www/html/goodbad.txt; done
+helm upgrade my-chart ./my-chart
 ```
 
-Continue to troubleshoot the problem by temporarily fixing the file
+Verify new `Route` from Terminal:
 
 ```
-for i in $(oc get pods | grep goodbad | grep -v build | awk '{print $1}'); do oc exec -t $i -- sed -i -e s/[0-9]*/7/ /var/www/html/goodbad.txt; done
+oc get routes
 ```
 
-Write a quick test that verifies the logic of your fix
+Verify new `Revision`:
 
 ```
-for i in {1..2000}; do curl $SVC_IP 2>&1; done | grep "Hello World" | wc -l
+helm ls
 ```
 
-Scale up the nodes, and test again. Notice it's broken again because new pods have been added with the broken file
+Verify new `Route` and new `Revision` from Console:
+
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/my-chart-helm-chart-route.png" width="800" />
+
+<img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/my-chart-new-revision.png" width="800" />
+
+
+### Upgrade and Rollback
+
+Let's update again our existing release overriding values in `values.yaml` changing `image.pullPolicy` from chart's default value `IfNotPresent` to `Always`, using same method we adopted previously for changing `service.type` with option `--set`:
 
 ```
-oc scale rc goodbad --replicas=10
+helm upgrade my-chart ./my-chart --set image.pullPolicy=Always
 ```
 
+Let's verify that our changes is reflected into resulting `Deployment`:
+
 ```
-for i in {1..2000}; do curl $SVC_IP 2>&1; done | grep "Hello World" | wc -l
+oc get deployment my-chart -o yaml | grep imagePullPolicy
 ```
 
-Optional: As a final challenge, fix the problem permanently by fixing the logic so that the number is always above 7 and never causes the application to break. Rebuild, and redeploy the application. Hint: you have to get the images to redeploy with the newer versions (delete the rc) :-)
+Get current `Revision`:
+
+```
+helm ls
+```
+
+Now that our new release is published and verified, we can decide to rollback to previous version if we need to, and this is possible with `helm rollback` command.
+
+It is also possible to dry-run the rollback with `--dry-run` option:
+
+```
+helm rollback my-chart 2 --dry-run
+```
+
+Rollback to starting revision:
+
+```
+helm rollback my-chart 2
+```
+
+Check pods:
+
+```
+oc get pods
+```
+
+Verify `imagePullPolicy` is rolled back to `Revision` 2 containing `IfNotPresent` Policy:
+
+```
+oc get deployment my-chart -o yaml | grep imagePullPolicy
+```
+
+### Uninstall
+
+Uninstall will clean everything now, there's no further need to delete manually the `Route` like in first chapter, since the Helm Chart is now managing that resource:
+
+```
+helm uninstall my-chart
+```
 
 ## What's Next?
 
