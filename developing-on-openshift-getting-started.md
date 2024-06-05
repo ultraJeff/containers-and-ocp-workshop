@@ -74,17 +74,17 @@ You will be presented with the OpenShift login screen. Use the following credent
 
 Log into the OpenShift web console, as shown in the figure below.
 
-![Web Console Login](../assets/web-console-login.png)
+![Web Console Login](./assets/developing-on-openshift-getting-started/assets/web-console-login.png)
 
 |NOTE:|
 |----|
 |You might see the following warning notification due to using an untrusted security certificate.
-![Security warning](../assets/security_warning.png)
+![Security warning](./assets/developing-on-openshift-getting-started/assets/security_warning.png)
 If you do get the warning, click the **Advanced** button to complete the process necessary to grant permission to the browser to access the OpenShift Web Console.|
 
 After logging into the web console, take a look a the menu on the left. Notice that you're in the **Administrator** perspective, as shown in the figure below:
 
-![Admin Perspective](../assets/admin-perspective.png)
+![Admin Perspective](./assets/developing-on-openshift-getting-started/assets/admin-perspective.png)
 
 You need to change the perspective from **Administrator** to **Developer**.
 
@@ -92,7 +92,7 @@ You need to change the perspective from **Administrator** to **Developer**.
 
 `Step 2:` Select the **Developer** perspective from the dropdown on the left side menu in the OpenShift web console as shown in the figure below.
 
-![Switch to Developer](../assets/change-to-developer.png)
+![Switch to Developer](./assets/developing-on-openshift-getting-started/assets/change-to-developer.png)
 
 Now that you're in the **Developer** perspective, let's take a moment to discuss the concept of a **project** in OpenShift.
 
@@ -120,7 +120,7 @@ Click the button labeled **+Add** on the menu bar on the left side of the Web Co
 
 `Step 4:` Click the link with the text **Create a project** as shown in the figure below:
 
-![Create project](../assets/add_project.png)
+![Create project](./assets/developing-on-openshift-getting-started/assets/add_project.png)
 
 You'll be presented with the **Add Project** dialog for declaring the project.
 
@@ -128,7 +128,7 @@ You'll be presented with the **Add Project** dialog for declaring the project.
 
 `Step 5:` Name the project `myproject` as shown in the figure below:
 
-![Name project](../assets/config-project.png)
+![Name project](./assets/developing-on-openshift-getting-started/assets/config-project.png)
 
 ----
 
@@ -136,7 +136,7 @@ You'll be presented with the **Add Project** dialog for declaring the project.
 
 You will be presented with the **Add** page as shown in the figure below.
 
-![Select container](../assets/select-container-with-code.png)
+![Select container](./assets/developing-on-openshift-getting-started/assets/select-container-with-code.png)
 
 ----
 
@@ -145,7 +145,7 @@ You will be presented with the **Add** page as shown in the figure below.
 
 You'll be presented with the **Deploy Image** page as shown in the figure below.
 
-![Deploy Image](../assets/deploy-container.png)
+![Deploy Image](./assets/developing-on-openshift-getting-started/assets/deploy-container.png)
 
 ----
 
@@ -165,7 +165,7 @@ After you create the application, you will be presented with the **Topology** vi
 
 You will spend most of your time in the remainder of this tutorial in that perspective.
 
-![Topology View with App](../assets/topology-view-with-app.png)
+![Topology View with App](./assets/developing-on-openshift-getting-started/assets/topology-view-with-app.png)
 
 You are now ready to scale the application up and down.
 
@@ -187,7 +187,7 @@ You will scale up the application up to 2 replicas.
 
 `Step 1:` Click inside the circle for the `parksmap` application you just installed within the **Topology** view. The details window will appear in a side panel as shown in the figure below.
 
-![Scaling Up 1](../assets/scaling-01.png)
+![Scaling Up 1](./assets/developing-on-openshift-getting-started/assets/scaling-01.png)
 
 ----
 
@@ -195,7 +195,7 @@ You will scale up the application up to 2 replicas.
 
 The figure below illustrates selecting the **Details** and increasing the number of pods to 2.
 
-![Scaling Up 2](../assets/scaling-02.png)
+![Scaling Up 2](./assets/developing-on-openshift-getting-started/assets/scaling-02.png)
 
 You are now running two replicas of the application.
 
@@ -205,7 +205,7 @@ You are now running two replicas of the application.
 
 `Step 3:` To verify that we changed the number of replicas, click the **Resources** tab in the side panel. You will see a list of pods as shown in the figure below.
 
-![View Pods](../assets/view-pods.jpg)
+![View Pods](./assets/developing-on-openshift-getting-started/assets/view-pods.jpg)
 
 You can see that we now have 2 replicas. Now, let's take a look at OpenShift's self-healing feature. Self Healing ensures that the number of pods you declare for your application is always running.
 
@@ -219,17 +219,17 @@ Now you will kill one of the pods to see if OpenShift will bring it back to life
 
 `Step 4:` On the **Resources** tab where you viewed the list of pods after scaling to 2 replicas, click the name of one of the pods in the list as shown in the figure below.
 
-![View pods](../assets/view-pods.jpg)
+![View pods](./assets/developing-on-openshift-getting-started/assets/view-pods.jpg)
 
 ----
 
 `Step 5:` In the top right corner of the page, there is an **Actions** drop down menu. Click it and select **Delete Pod** as shown in the figure below.
 
-![Delete Pod](../assets//delete-pod.png)
+![Delete Pod](./assets/developing-on-openshift-getting-started/assets//delete-pod.png)
 
 After deleting the pod, you will be taken to a page listing pods. Notice that even though you deleted one pod, two pods are still running, as shown in the figure below.
 
-![Replenish Pod](../assets/replenish-pod.jpg)
+![Replenish Pod](./assets/developing-on-openshift-getting-started/assets/replenish-pod.jpg)
 
 A replacement pod was created because OpenShift will always make sure that when a pod dies, it creates a new pod to fill its place.
 
@@ -247,7 +247,7 @@ Before we continue, go ahead and scale your application down to a single instanc
 
 `Step 6d:` Click the down arrow to the right of the pod circle to reset the number of pods to 1 as shown in the figure below.
 
-![Reset pod count](../assets/reset-pod-count.jpg)
+![Reset pod count](./assets/developing-on-openshift-getting-started/assets/reset-pod-count.jpg)
 
 ## Congratulations!
 
@@ -270,7 +270,7 @@ As mentioned earlier in the tutorial, When you create an application from a **co
 
 `Step 1:` To view the **route** for your application, make sure you are in the **Developer** perspective by selecting **Developer** from the dropdown list on the left side menu bar. Then from within **Topology** view, click the application circle as shown in the figure below.
 
-![Select App](../assets/select-app.png)
+![Select App](./assets/developing-on-openshift-getting-started/assets/select-app.png)
 
 The information page for the pods will slide out as a panel on the right-hand side of the page.
 
@@ -282,7 +282,7 @@ The information page for the pods will slide out as a panel on the right-hand si
 
 `Step 3:` Scroll down to the **Routes** section at the bottom of the web page as shown figure below.
 
-![Select Route](../assets//select-route.png)
+![Select Route](./assets/developing-on-openshift-getting-started/assets//select-route.png)
 
 The route URL for your application is shown as a link.
 
@@ -298,11 +298,11 @@ You can also access an application's **route** URL directly within the applicati
 
 `Step 5:` Click the icon in the upper right of the application's circular graphic as shown in the figure below.
 
-![Open from topology](../assets/access-url-from-topology.png)
+![Open from topology](./assets/developing-on-openshift-getting-started/assets/access-url-from-topology.png)
 
 Clicking the icon opens the application's web page in a browser as shown in th figure below.
 
-![View map](../assets/view-map.png)
+![View map](./assets/developing-on-openshift-getting-started/assets/view-map.png)
 
 ----
 
@@ -337,7 +337,6 @@ First, create a new OpenShift project:
 
 ```
 oc new-project myproject
-
 ```
 
 Now look at the objects/resources that define the application:
