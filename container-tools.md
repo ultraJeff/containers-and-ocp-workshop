@@ -432,7 +432,7 @@ Exit the user namespace:
 exit
 ```
 
-### Conclusion
+### Conclusions
 
 Now, you have a pretty good understanding of the cases where Buildah really shines. You can start from scratch, or use an existing image, use tools installed on the container host (not in the container image), and move data around as needed. This is a very flexible tool that should fit quite nicely in your tool belt. Buildah lets you script builds with any language you want, and build tiny images with only the bare minimum of utilities needed inside the image.
 
@@ -524,7 +524,7 @@ Finally, exit the ''rhel'' user because we need root for the next lab:
 exit
 ```
 
-### Conclusion
+### Conclusions
 
 You have a new tool in your tool belt for sharing and moving containers. Hopefully, you find other uses for Skopeo.
 
@@ -710,7 +710,7 @@ oscap-podman registry.access.redhat.com/ubi8/ubi:latest oval eval --report ./ass
 
 Look at the new report from thr *OSCAP Report latest* Tab.
 
-### Conclusion
+### Conclusions
 
 In general you should almost never see any unapplied patches in this latest build of UBI. If you do, it's like a small window between the time that Red Hat Product Security has issued a CVE, and our product team has rebuilt and published the UBI image. The oscap-podman command allows you to verify this and is useful in "trust but verify" operations like CI/CD system tests. For more information and deeper dive on OSCAP-Podman, check out this great video by Brian Smith: [Scanning Containers for Vulnerabilities on RHEL 8.2 With OpenSCAP and Podman](https://www.youtube.com/watch?v=nQmIcK1vvYc)
 
