@@ -228,12 +228,11 @@ User -> Web App (port 80) -> Database (port 3306)
 ~~~~
 
 
-Take a quick look at this YAML file but don't don't get too worried if you don't fully understand the YAML. There are plenty of great tutorials on Kubernetes, and most people learn it over iterations, and building new applications:
+Take a quick look at this YAML file but don't don't get too worried if you don't fully understand the YAML. There are plenty of great tutorials on Kubernetes & OpenShift (like in the next chapter), and most people learn it over iterations, and building new applications:
 
 ```
 curl https://raw.githubusercontent.com/fatherlinux/two-pizza-team/master/two-pizza-team-ubi.yaml
 ```
-
 
 In the "database," we are opening a file and using netcat to ship it over port 3306. In the "web app", we are pulling in the data from port 3306, and shipping it back out over port 80 like a normal application would. The idea is to show a simple example of how powerful this is without having to learn other technology. We are able to fire this application up in an instant with a single *oc* command:
 
@@ -257,30 +256,13 @@ curl $(oc get svc pepperoni-pizza -ojsonpath='{.spec.clusterIP}')
 
 **Note:** The command in brackets above is simply getting the IP address of the web server.
 
-Now, let's pull data directly from the "database."  It's the same file as we would expect, but this time coming back over port 3306:
+Now, let's pull data directly from the "database." It's the same file as we would expect, but this time coming back over port 3306:
 
 ```
 curl $(oc get svc cheese-pizza -ojsonpath='{.spec.clusterIP}'):3306
 ```
 
 Take a moment to note that we could fire up 50 copies of this same application in Kubernetes with 49 more commands (in different projects). It's that easy.
-
-<!-- ### Closing
-
-In this lab, we have covered container images, registries, hosts, and orchestration as four new primitives you need to learn on your container journey. If you are struggling to understand why you need containers, or why need to move to orchestration - or maybe you are struggling to explain it to your management or others in your team - maybe thinking about it in this context will help:
-
-![Container Journey](./assets/subsystems-container-internals-lab-2-0-part-1/assets/06-journey.png)
-
-It is a journey, and we are always happy to help. If you want help along the way, here are some people to follow on Twitter:
-
-* Scott McCarty (Product Manager): [@fatherlinux](https://twitter.com/fatherlinux)
-* Dan Walsh (Containers Team Lead): [@rhatdan](https://twitter.com/rhatdan)
-* Mrunal Patel (Lead for CRI-O): [@mrunalp](https://twitter.com/mrunalp)
-* Nalin Dahyabhai (Lead for Buildah): [@atnalind](https://twitter.com/atnalind)
-* Tom Sweeney (Core Engineer): [@TSweeneyRedHat](https://twitter.com/TSweeneyRedHat)
-* Valentin Rothberg (Core Engineer): [@vlntnrthbrg](https://twitter.com/vlntnrthbrg)
-* William Henry (Core Engineer): [@ipbabble](https://twitter.com/ipbabble)
-* Vincent Batts: (OCI Contributor): [@vbatts](https://twitter.com/vbatts) -->
 
 ## Manage Your Containers
 
@@ -376,7 +358,7 @@ It failed, but why? Try again with a complete URL:
 podman inspect ubi7:test
 ```
 
-Notice that podman resolves container images similar to DNS resolution. Each container engine is different, and Docker will actually resolve some things podman doesn't because there is no standard on how image URIs are resolved. If you test long enough, you will find many other caveats to namespace, repository, and tag resolution. Generally, it's best to always use the full URI, specifying the server, namespace, repository, and tag. Remember this when building scripts. Containers seem deceptively easy, but you need to pay attention to details.
+Notice that Podman resolves container images similar to DNS resolution. Each container engine is different, and Docker will actually resolve some things Podman doesn't because there is no standard on how image URIs are resolved. If you test long enough, you will find many other caveats to namespace, repository, and tag resolution. Generally, it's best to always use the full URI, specifying the server, namespace, repository, and tag. Remember this when building scripts. Containers seem deceptively easy, but you need to pay attention to details.
 
 ### Image Internals
 
