@@ -191,7 +191,8 @@ The kernel is responsible for the last mile of container creation, as well as re
 
 Containers are just regular Linux processes that were started as child processes of a container runtime instead of by a user running commands in a shell. All Linux processes live side by side, whether they are daemons, batch jobs or user commands - the container engine, container runtime, and containers (child processes of the container runtime) are no different. All of these processes make requests to the Linux kernel for protected resources like memory, RAM, TCP sockets, etc.
 
-Execute a few commands with podman and notice the process IDs, and namespace IDs. Containers are just regular processes:
+<!-- TODO: Find different container that will curl correctly with Podman Summit Workshop instance -->
+<!-- Execute a few commands with podman and notice the process IDs, and namespace IDs. Containers are just regular processes:
 
 ```
 podman ps -ls
@@ -206,6 +207,7 @@ ps -ef | grep 3306
 ```
 
 We will explore this deeper in later labs but, for now, commit this to memory, containers are simply Linux ...
+-->
 
 ## Manage Your Containers
 
@@ -219,16 +221,28 @@ Let's take a look at some base images. We will use the podman history command to
 podman history registry.access.redhat.com/ubi7/ubi:latest
 ```
 
-Now, let's take a look at the minimal base image, which is part of the Red Hat Universal Base Image (UBI) collection. Notice that it's quite a bit smaller:
+<!-- TODO podman history doesn't seem to work for remote images -->
+<!-- Now, let's take a look at the minimal base image, which is part of the Red Hat Universal Base Image (UBI) collection. Notice that it's quite a bit smaller:
 
 ```
 podman history registry.access.redhat.com/ubi7/ubi-minimal:latest
+``` -->
+
+Now, create a new  file named `Dockerfile` and add the content below
+
+```
+FROM registry.access.redhat.com/ubi7/ubi
+RUN echo "Hello world" > /tmp/newfile
+RUN echo "Hello world" > /tmp/newfile2
+RUN echo "Hello world" > /tmp/newfile3
+RUN echo "Hello world" > /tmp/newfile4
+RUN echo "Hello world" > /tmp/newfile5
 ```
 
-Now, using a simple Dockerfile we created for you, build a multi-layered image:
+Now, build a new multi-layered image:
 
 ```
-podman build -t ubi7-change -f ~/labs/lab2-step1/Dockerfile
+podman build -t ubi7-change -f ~/Dockerfile
 ```
 
 Do you see the newly created ubi7-change tag?
@@ -280,7 +294,7 @@ podman inspect ubi7/ubi
 Now, let's build another image, but give it a tag other than "latest":
 
 ```
-podman build -t ubi7:test -f ~/labs/lab2-step1/Dockerfile
+podman build -t ubi7:test -f ~/Dockerfile
 ```
 
 Now, notice there is another tag.
@@ -305,7 +319,7 @@ Notice that Podman resolves container images similar to DNS resolution. Each con
 
 ### Image Internals
 
-In this exercise, we will take a look at what's inside the container image. Java is particularly interesting because it uses glibc, even though most people don't realize it. We will use the ldd command to prove it, which shows you all of the libraries that a binary is linked against. When a binary is dynamically linked (libraries loaded when the binary starts), these libraries must be installed on the system, or the binary will not run. In this example, in particular, you can see that getting a JVM to run with the exact same behavior requires compiling and linking in the same way. Stated another way, all Java images are not created equal:
+Now, we will take a look at what's inside the container image. Java is particularly interesting because it uses glibc, even though most people don't realize it. We will use the ldd command to prove it, which shows you all of the libraries that a binary is linked against. When a binary is dynamically linked (libraries loaded when the binary starts), these libraries must be installed on the system, or the binary will not run. In this example, in particular, you can see that getting a JVM to run with the exact same behavior requires compiling and linking in the same way. Stated another way, all Java images are not created equal:
 
 ```
 podman run -it registry.access.redhat.com/jboss-eap-7/eap70-openshift ldd -v -r /usr/lib/jvm/java-1.8.0-openjdk/jre/bin/java
@@ -381,23 +395,24 @@ The goal of this exercise is to understand the basics of trust when it comes to 
 1. You must download a trusted thing
 2. You must download from a trusted source
 
-Each of these is necesary, but neither alone is sufficient. This has been true since the days of downloading ISO images for Linux distros. Whether evaluating open source libraries or code, prebuilt packages (RPMs or Debs), or [Container Images](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.dqlu6589ootw), we must:
+Each of these is necessary, but neither alone is sufficient. This has been true since the days of downloading ISO images for Linux distros. Whether evaluating open source libraries or code, prebuilt packages (RPMs or Debs), or [Container Images](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.dqlu6589ootw), we must:
 
-1. determine if we trust the image by evaluating the quality of the code, people, and organizations involved in the project. If it has enough history, investment, and actually works for us, we start to trust it.
+1. Determine if we trust the image by evaluating the quality of the code, people, and organizations involved in the project. If it has enough history, investment, and actually works for us, we start to trust it.
 
-2. determine if we trust the registry, by understanding the quality of its relationship with the trusted project - if we download something from the offical GitHub repo, we trust it more than from a fork by user Haxor5579. This is true with ISOs from mirror sites and with image repositories built by people who aren't affiliated with the underlying code or packages.
+2. Determine if we trust the registry, by understanding the quality of its relationship with the trusted project - if we download something from the offical GitHub repo, we trust it more than from a fork by user Haxor5579. This is true with ISOs from mirror sites and with image repositories built by people who aren't affiliated with the underlying code or packages.
 
 There are [plenty of examples](https://www.infoworld.com/article/3289790/application-security/deep-container-inspection-what-the-podman-hub-minor-virus-and-xcodeghost-breach-can-teach-about-con.html) where people ignore one of the above and get hacked.  In a previous lab, we learned how to break the URL down into registry server, namespace and repository.
 
 #### Trusted Thing
 
-From a security perspective, it's much better to remotely inspect and determine if we trust an image before we download it, expand it, and cache it in the local storage of our container engine. Everytime we download an image, and expose it to the graph driver in the container engine, we expose ourselves to potential attack. First, let's do a remote inspect with Skopeo (can't do that with docker because of the client/server nature):
+From a security perspective, it's much better to remotely inspect and determine if we trust an image before we download it, expand it, and cache it in the local storage of our container engine. Every time we download an image, and expose it to the graph driver in the container engine, we expose ourselves to potential attack. First, let's do a remote inspect with Skopeo (can't do that with Podman because of the client/server nature):
 
-```
+```bash
+sudo dnf install -y skopeo
 skopeo inspect docker://registry.fedoraproject.org/fedora
 ```
 
-Examine the JSON. There's really nothing in there that helps us determine if we trust this repository. It "says" it was created by the Fedora project ("vendor": "Fedora Project") but we have no idea if that is true. We have to move on to verifying that we trust the source, then we can determin if we trust the thing.
+Examine the JSON. There's really nothing in there that helps us determine if we trust this repository. It "says" it was created by the Fedora project ("vendor": "Fedora Project") but we have no idea if that is true. We have to move on to verifying that we trust the source, then we can determine if we trust the thing.
 
 #### Trusted Source
 
@@ -407,7 +422,7 @@ There's a lot of talk about image signing, but the reality is, most people are n
 curl -I https://registry.fedoraproject.org
 ```
 
-Notice that the SSL certificate fails to pass muster. That's because the DigiCert root CA certificate is not in /etc/pki on this CentOS lab box. On RHEL and Fedora this certficate is distributed by default and the SSL certificate for registry.fedoraproject.org passes muster. So, for this lab, you have to trust me, I tested it :-) If you were on a Fedora or Red Hat Enterprise Linux box with the right keys, the output would have looked like this:
+Since you are on a Red Hat Enterprise Linux box with the right keys, the output should look like this:
 
 ```shell
 HTTP/2 200
@@ -428,9 +443,9 @@ x-fedora-requestid: XMHzYeZ1J0RNEOvnRANX3QAAAAE
 content-type: text/html
 ```
 
-Even without the root CA certificate installed, we can discern that the certicate is valid and managed by Red Hat, which helps a bit:
+You can also discern that the certicate is valid and managed by Red Hat, which helps a bit:
 
-```
+```bash
 curl 2>&1 -kvv https://registry.fedoraproject.org | grep subject
 ```
 
@@ -444,17 +459,17 @@ Now, lets move on to evaluate some trickier repositories and registry servers...
 
 ### Evaluating Trust - Images and Registry Servers
 
-The goal of this exercise is to learn how to evaluate [Container Images](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.dqlu6589ootw) and [Registry Servers](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.4cxnedx7tmvq).
+Let's learn how to evaluate [Container Images](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.dqlu6589ootw) and [Registry Servers](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.4cxnedx7tmvq).
 
 #### Evaluating Images
 
-First, lets start what we already know, there is often a full functioning Linux distro inside a container image. That's because it's useful to leverage existing packages and the dependency tree already created for it. This is true whether running on bare metal, in a virtual machine, or in a container image. It's also important to consider the quality, frequency, and ease of consuming updates in the container image.
+First, let's start with what we already know: there is often a full functioning Linux distro inside a container image. That's because it's useful to leverage existing packages and the dependency tree already created for it. This is true whether running on bare metal, in a virtual machine, or in a container image. It's also important to consider the quality, frequency, and ease of consuming updates in the container image.
 
 To analyze the quality, we are going to leverage existing tools - which is another advantage of consuming a container images based on a Linux distro. To demonstrate, let's examine images from four different Linux distros - CentOS, Fedora, Ubuntu, and Red Hat Enterprise Linux. Each will provide differing levels of information:
 
 ##### CentOS
 
-```
+```bash
 podman run -it docker.io/centos:7.0.1406 yum updateinfo
 ```
 
@@ -462,13 +477,13 @@ CentOS does not provide Errata for package updates, so this command will not sho
 
 ##### Fedora
 
-```
+```bash
 podman run -it registry.fedoraproject.org/fedora dnf updateinfo
 ```
 
 Fedora provides decent meta data about package updates, but does not map them to CVEs either. Results will vary on any given day, but the output will often look something like this:
 
-```
+```shell
 Last metadata expiration check: 0:00:07 ago on Mon Oct  8 16:22:46 2018.
 Updates Information Summary: available
     5 Security notice(s)
@@ -480,37 +495,42 @@ Updates Information Summary: available
 
 ##### Ubuntu
 
-```
+```bash
 podman run -it docker.io/ubuntu:trusty-20170330 /bin/bash -c "apt-get update && apt list --upgradable"
 ```
 
 Ubuntu provides information at a similar quality to Fedora, but again does not map updates to CVEs easily. The results for this specific image should always be the same because we are purposefully pulling an old tag for demonstration purposes.
 
 ##### Red Hat Enterprise Linux
+<!--
 ```
 podman run -it registry.access.redhat.com/ubi7/ubi:7.6-73 yum updateinfo security
 ```
-
-Regretfully, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output should look like the following if ran on RHEL or in OpenShift:
-
+-->
+```bash
+podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
 ```
+
+Regrettably, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output would look more like the following if we did:
+
+```shell
 RHSA-2019:0679 Important/Sec. libssh2-1.4.3-12.el7_6.2.x86_64
 RHSA-2019:0710 Important/Sec. python-2.7.5-77.el7_6.x86_64
 RHSA-2019:0710 Important/Sec. python-libs-2.7.5-77.el7_6.x86_64
 ```
 
-Notice the RHSA-***:*** column - this indicates the Errata and it's level of importnace. This errata can be used to map the update to a particular CVE, giving you and your security team confidence that a container image is patched for any particular CVE. Even without a Red Hat subscription, we can analyze the quality of a Red Hat image by looking at the Red Hat Container Cataog and using the Contianer Health Index:
+Notice the RHSA-***:*** column - this indicates the Errata and its level of importance. This errata can be used to map the update to a particular CVE, giving you and your security team confidence that a container image is patched for any particular CVE. Even without a Red Hat subscription, we can analyze the quality of a Red Hat image by looking at the Red Hat Container Cataog and using the Contianer Health Index:
 
-- Click: [Red Hat Enterprise Universal Base Image 7](https://access.redhat.com/containers/?architecture=#/registry.access.redhat.com/ubi7/ubi/images/7.6-73)
+- Click: [Red Hat Enterprise Universal Base Image 9](https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b?architecture=amd64&image=66587ef88f7aa87f87f2550a&container-tabs=overview)
 
 We should see something similar to:
 
-![Evaluating Trust](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/subsystems/container-internals-lab-2-0-part-3/02-evaluating-trust.png)
+![Evaluating Trust](./assets/images/ubi9-overview-page.png)
 
 
 #### Evaluating Registries
 
-Now, that we have taken a look at several container images, we are going to start to look at where they came from and how they were built - we are going to evaluate four registry servers - Fedora, podmanHub, Bitnami and the Red Hat Container Catalog:
+Now, that we have taken a look at several container images, we are going to start to look at where they came from and how they were built - we are going to evaluate four registry servers - Fedora, DockerHub, Bitnami and the Red Hat Container Catalog:
 
 ##### Fedora Registry
 - Click: [registry.fedoraproject.org](https://registry.fedoraproject.org/)
@@ -526,16 +546,16 @@ DockerHub provides "official" images for a lot of different pieces of software i
 ##### Bitnami
 - Click: [https://bitnami.com/containers](https://bitnami.com/containers)
 
-Similar to podmanHub, there is not a lot of information linking these repostories to the upstream projects in any meaningful way. There is not even a clear understanding of what tags are available, or should be used. Again, not policy information and users are pretty much left to sift through GitHub repositories to have any understanding of how they are built of if there is any lifecycle guarantees about versions. You are pretty much left to just trusting that Bitnami builds containers the way you want them...
+Similar to DockerHub, there is not a lot of information linking these repostories to the upstream projects in any meaningful way. There is not even a clear understanding of what tags are available, or should be used. Again, no policy information and users are pretty much left to sift through GitHub repositories to have any understanding of how they are built of if there is any lifecycle guarantees about versions. You are pretty much left to just trusting that Bitnami builds containers the way you want them...
 
 
 ##### Red Hat Container Catalog
-- Click: [https://access.redhat.com/containers](https://access.redhat.com/containers/#/registry.access.redhat.com/ubi7/ubi)
+- Click: [https://catalog.redhat.com](https://catalog.redhat.com/software/containers/ubi7/5c6cbf69dd19c77a158f2893?architecture=amd64&image=6492b1ebd5465128282c3747)
 
 The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each respository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known
- vulnerabilities. That's because container images age like cheese, not like wine. Trust is termporal and older container images age just like servers which are rarely or never patched.
+ vulnerabilities. That's because container images age like cheese, not like wine. Trust is fleeting and older container images age just like servers which are rarely or never patched.
 
-Now take a look at the Container Health Index scoring for each tag that is available. Notice, that the newer the tag, the better the letter grade. The Red Hat Container Catalog and Container Health Index clearly show you that the newer images have a less vulnerabiliites and hence have a better letter grade. To fully understand the scoring criteria, check out [Knowledge Base Article](https://access.redhat.com/articles/2803031). This is a compeltely unique capability provided by the Red Hat Container Catalog because container image Errata are produced tying container images to CVEs.
+Now take a look at the Container Health Index scoring for each tag that is available. Notice, that the newer the tag, the better the letter grade. The Red Hat Container Catalog and Container Health Index clearly show you that the newer images have a less vulnerabiliites and hence have a better letter grade. To fully understand the scoring criteria, check out [Knowledge Base Article](https://access.redhat.com/articles/2803031). This is a completely unique capability provided by the Red Hat Container Catalog because container image Errata are produced tying container images to CVEs.
 
 #### Summary
 
@@ -545,11 +565,11 @@ Knowing what you know now:
 - Is brand enough? Tooling? Lifecycle? Quality?
 - How would you analyze repositories and registries to meet the needs of your company?
 
-These questions seem easy, but their really not. It really makes you revisit what it means to "trust" a container registry and repository...
+These questions seem easy, but they're really not. It really makes you revisit what it means to "trust" a container registry and repository...
 
 ### Analyzing Storage and Graph Drivers
 
-In this lab, we are going to focus on how [Container Enginers](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) cache [Repositories](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on the container host. There is a little known or understood fact - whenever you pull a container image, each layer is cached locally, mapped into a shared filesystem - typically overlay2 or devicemapper. This has a few implications. First, this means that caching a container image locally has historically been a root operation. Second, if you pull an image, or commit a new layer with a password in it, anybody on the system can see it, even if you never push it to a registry server.
+In this lab, we are going to focus on how [Container Engines](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) cache [Repositories](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on the container host. There is a little known or understood fact - whenever you pull a container image, each layer is cached locally, mapped into a shared filesystem - typically overlay2 or devicemapper. This has a few implications. First, this means that caching a container image locally has historically been a root operation. Second, if you pull an image, or commit a new layer with a password in it, anybody on the system can see it, even if you never push it to a registry server.
 
 Now, let's take a look at Podman container engine. It pulls OCI compliant, docker compatible images:
 
