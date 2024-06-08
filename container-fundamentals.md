@@ -34,10 +34,6 @@ Welcome to this workshop on containers and OpenShift! Today, we will use a hoste
     - [Analyzing Storage and Graph Drivers](#analyzing-storage-and-graph-drivers)
   - [Run Container Images with Hosts](#run-container-images-with-hosts)
     - [Container Engines \& The Linux Kernel](#container-engines--the-linux-kernel)
-    - [Step-by-Step Creation of a Container](#step-by-step-creation-of-a-container)
-      - [Pull/Expand/Mount Image](#pullexpandmount-image)
-      - [Create Spec File](#create-spec-file)
-      - [Call Runtime](#call-runtime)
     - [SELinux \& sVirt: Dynamically generated contexts to protect your containers](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers)
     - [Cgroups: Dynamically created with container instantiation](#cgroups-dynamically-created-with-container-instantiation)
     - [SECCOMP: Limiting how a containerized process can interact with the kernel](#seccomp-limiting-how-a-containerized-process-can-interact-with-the-kernel)
@@ -192,7 +188,7 @@ The kernel is responsible for the last mile of container creation, as well as re
 Containers are just regular Linux processes that were started as child processes of a container runtime instead of by a user running commands in a shell. All Linux processes live side by side, whether they are daemons, batch jobs or user commands - the container engine, container runtime, and containers (child processes of the container runtime) are no different. All of these processes make requests to the Linux kernel for protected resources like memory, RAM, TCP sockets, etc.
 
 <!-- TODO: Find different container that will curl correctly with Podman Summit Workshop instance -->
-<!-- Execute a few commands with podman and notice the process IDs, and namespace IDs. Containers are just regular processes:
+<!-- Execute a few commands with Podman and notice the process IDs, and namespace IDs. Containers are just regular processes:
 
 ```
 podman ps -ls
@@ -215,13 +211,13 @@ We will explore this deeper in later labs but, for now, commit this to memory, c
 
 The goal of this exercise is to understand the difference between base images and multi-layered images (repositories). Also, we'll try to understand the difference between an image layer and a repository.
 
-Let's take a look at some base images. We will use the podman history command to inspect all of the layers in these repositories. Notice that these container images have no parent layers. These are base images, and they are designed to be built upon. First, let's look at the full ubi7 base image:
+Let's take a look at some base images. We will use the Podman history command to inspect all of the layers in these repositories. Notice that these container images have no parent layers. These are base images, and they are designed to be built upon. First, let's look at the full ubi7 base image:
 
 ```
 podman history registry.access.redhat.com/ubi7/ubi:latest
 ```
 
-<!-- TODO podman history doesn't seem to work for remote images -->
+<!-- TODO Podman history doesn't seem to work for remote images -->
 <!-- Now, let's take a look at the minimal base image, which is part of the Red Hat Universal Base Image (UBI) collection. Notice that it's quite a bit smaller:
 
 ```
@@ -267,7 +263,7 @@ Now we are going to inspect the different parts of the URL that you pull. The mo
 podman inspect ubi7/ubi
 ```
 
-But, what's really going on? Well, similar to DNS, the podman command line is resolving the full URL and TAG of the repository on the registry server. The following command will give you the exact same results:
+But, what's really going on? Well, similar to DNS, the Podman command line is resolving the full URL and TAG of the repository on the registry server. The following command will give you the exact same results:
 
 ```
 podman inspect registry.access.redhat.com/ubi7/ubi:latest
@@ -401,7 +397,7 @@ Each of these is necessary, but neither alone is sufficient. This has been true 
 
 2. Determine if we trust the registry, by understanding the quality of its relationship with the trusted project - if we download something from the offical GitHub repo, we trust it more than from a fork by user Haxor5579. This is true with ISOs from mirror sites and with image repositories built by people who aren't affiliated with the underlying code or packages.
 
-There are [plenty of examples](https://www.infoworld.com/article/3289790/application-security/deep-container-inspection-what-the-podman-hub-minor-virus-and-xcodeghost-breach-can-teach-about-con.html) where people ignore one of the above and get hacked.  In a previous lab, we learned how to break the URL down into registry server, namespace and repository.
+There are [plenty of examples](https://www.infoworld.com/article/3289790/application-security/deep-container-inspection-what-the-Podman-hub-minor-virus-and-xcodeghost-breach-can-teach-about-con.html) where people ignore one of the above and get hacked.  In a previous lab, we learned how to break the URL down into registry server, namespace and repository.
 
 #### Trusted Thing
 
@@ -470,7 +466,7 @@ To analyze the quality, we are going to leverage existing tools - which is anoth
 ##### CentOS
 
 ```bash
-podman run -it docker.io/centos:7.0.1406 yum updateinfo
+Podman run -it docker.io/centos:7.0.1406 yum updateinfo
 ```
 
 CentOS does not provide Errata for package updates, so this command will not show any information. This makes it difficult to map CVEs to RPM packages. This, in turn, makes it difficult to update the packages which are affected by a CVE. Finally, this lack of information makes it difficult to score a container image for quality. A basic workaround is to just update everything, but even then, you are not 100% sure which CVEs you patched.
@@ -478,7 +474,7 @@ CentOS does not provide Errata for package updates, so this command will not sho
 ##### Fedora
 
 ```bash
-podman run -it registry.fedoraproject.org/fedora dnf updateinfo
+Podman run -it registry.fedoraproject.org/fedora dnf updateinfo
 ```
 
 Fedora provides decent meta data about package updates, but does not map them to CVEs either. Results will vary on any given day, but the output will often look something like this:
@@ -496,7 +492,7 @@ Updates Information Summary: available
 ##### Ubuntu
 
 ```bash
-podman run -it docker.io/ubuntu:trusty-20170330 /bin/bash -c "apt-get update && apt list --upgradable"
+Podman run -it docker.io/ubuntu:trusty-20170330 /bin/bash -c "apt-get update && apt list --upgradable"
 ```
 
 Ubuntu provides information at a similar quality to Fedora, but again does not map updates to CVEs easily. The results for this specific image should always be the same because we are purposefully pulling an old tag for demonstration purposes.
@@ -508,7 +504,7 @@ podman run -it registry.access.redhat.com/ubi7/ubi:7.6-73 yum updateinfo securit
 ```
 -->
 ```bash
-podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
+Podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
 ```
 
 Regrettably, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output would look more like the following if we did:
@@ -569,22 +565,23 @@ These questions seem easy, but they're really not. It really makes you revisit w
 
 ### Analyzing Storage and Graph Drivers
 
-In this lab, we are going to focus on how [Container Engines](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) cache [Repositories](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on the container host. There is a little known or understood fact - whenever you pull a container image, each layer is cached locally, mapped into a shared filesystem - typically overlay2 or devicemapper. This has a few implications. First, this means that caching a container image locally has historically been a root operation. Second, if you pull an image, or commit a new layer with a password in it, anybody on the system can see it, even if you never push it to a registry server.
+Next, we are going to focus on how [Container Engines](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) cache [Repositories](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on the container host. There is a little known or understood fact - whenever you pull a container image, each layer is cached locally, mapped into a shared filesystem - typically overlay2 or devicemapper. This has a few implications. First, this means that caching a container image locally has historically been a root operation. Second, if you pull an image, or commit a new layer with a password in it, anybody on the system can see it, even if you never push it to a registry server.
 
-Now, let's take a look at Podman container engine. It pulls OCI compliant, docker compatible images:
+Now, let's take a look at Podman container engine. It pulls OCI compliant, Docker compatible images:
 
 ```
 podman info  | grep -A4 graphRoot
 ```
 
-First, you might be asking yourself, [what the heck is d_type?](https://docs.docker.com/storage/storagedriver/overlayfs-driver/). Long story short, it's filesystem option that must be supported for overlay2 to work properly as a backing store for container images and running containers.
+First, you might be asking yourself, [what the heck is d_type?](https://docs.docker.com/storage/storagedriver/overlayfs-driver/). Long story short, it's a filesystem option that must be supported for overlay2 to work properly as a backing store for container images and running containers.
 
-Now, pull an image and verify that the files are just mapped right into the filesystem:
+<!-- This operation just stalls out -->
+<!-- Now, pull an image and verify that the files are just mapped right into the filesystem:
 
 ```
 podman pull registry.access.redhat.com/ubi7/ubi
 cat $(find /var/lib/containers/storage | grep /etc/redhat-release | tail -n 1)
-```
+``` -->
 
 With Podman, as well as most other container engines on the planet such as Docker, image layers are mapped one for one to some kind of storage, be it thinp snapshots with devicemapper, or directories with overlay2.
 
@@ -602,7 +599,7 @@ If you just do a quick Google search, you will find tons of architectural drawin
 
 How do people get it wrong? In two main ways:
 
-First, most of the architectural drawings above show the podman daemon as a wide blue box stretched out over the [Container Host](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.8tyd9p17othl). The [Containers](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.j2uq93kgxe0e) are shown as if they are running on top of the podman daemon. This is incorrect - [containers don't run on podman](https://crunchtools.com/so-what-does-a-container-engine-really-do-anyway/). The podman engine is an example of a general purpose [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l). Humans talk to container engines and container engines talk to the kernel - the containers are actually created and run by the Linux kernel. Even when drawings do actually show the right architecture between the container engine and the kernel, they never show containers running side by side:
+First, most of the architectural drawings above show the Podman daemon as a wide blue box stretched out over the [container host](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.8tyd9p17othl). The [containers](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.j2uq93kgxe0e) are shown as if they are running on top of the Podman daemon. This is incorrect - [containers don't run on Podman](https://crunchtools.com/so-what-does-a-container-engine-really-do-anyway/). The Podman engine is an example of a general purpose [container engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l). Humans talk to container engines and container engines talk to the kernel - the containers are actually created and run by the Linux kernel. Even when drawings do actually show the right architecture between the container engine and the kernel, they never show containers running side by side:
 
 
 Second, when drawings show containers are Linux processes, they never show the container engine side by side. This leads people to never think about these two things together, hence users are left confused with only part of the story:
@@ -630,7 +627,7 @@ Now, let's inspect the process table of the underlying host:
 ps -efZ | grep -v grep | grep " top"
 ```
 
-Notice that we started each of the ``top`` commands in containers. We started three with podman, but they are still just a regular process which can be viewed with the trusty old ``ps`` command. That's because containerized processes are just [fancy Linux processes](http://sdtimes.com/guest-view-containers-really-just-fancy-files-fancy-processes/) with extra isolation from normal Linux processes. A simplified drawing should really look something like this:
+Notice that we started each of the ``top`` commands in containers. We started three with Podman, but they are still just a regular process which can be viewed with the trusty old ``ps`` command. That's because containerized processes are just [fancy Linux processes](http://sdtimes.com/guest-view-containers-really-just-fancy-files-fancy-processes/) with extra isolation from normal Linux processes. A simplified drawing should really look something like this:
 
 ![Containers Are Linux](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/subsystems/container-internals-lab-2-0-part-4/01-single-node-toolchain.png)
 
@@ -638,11 +635,12 @@ In the kernel, there is no single data structure which represents what a contain
 
 ![Containers Are Linux](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/subsystems/container-internals-lab-2-0-part-4/01-kernel-engine.png)
 
-The Linux kernel only has a single major data structure that tracks processes - the process id table. The ``ps`` command dumps the contents of this data structure. But, this is not the total definition of a container - the container engine tracks which kernel isolation technologies are used, and even what data volumes are mounted. This information can be thought of as metadata which provides a definition for what we humans call a container. We will dig deeper into the technical underpinnings, but for now, understand that containerized processes are regular Linux processes which are isolated using kernel technologies like namespaces, selinux and cgroups. This is sometimes described as "sand boxing" or "isolation" or an "illusion" of virtualization.
+The Linux kernel only has a single major data structure that tracks processes - the process id table. The ``ps`` command dumps the contents of this data structure. But, this is not the total definition of a container - the container engine tracks which kernel isolation technologies are used, and even what data volumes are mounted. This information can be thought of as metadata which provides a definition for what we humans call a container. We will dig deeper into the technical underpinnings, but for now, understand that containerized processes are regular Linux processes which are isolated using kernel technologies like namespaces, SELinux and cgroups. This is sometimes described as "sand boxing" or "isolation" or an "illusion" of virtualization.
 
 In the end though, containerized processes are just regular Linux processes. All processes live side by side, whether they are regular Linux processes, long lived daemons, batch jobs, interactive commands which you run manually, or containerized processes. All of these processes make requests to the Linux kernel for protected resources like memory, RAM, TCP sockets, etc. We will explore this deeper in later labs, but for now, commit this to memory...
 
-### Step-by-Step Creation of a Container
+<!-- TODO: Figure out the issues with permission denied. Guessing this used to be a root container? -->
+<!-- ### Step-by-Step Creation of a Container
 
 In this step, we are going to investigate the basic construction of a container. The general contruction of a container is similar with almost all OCI compliant container engines:
 
@@ -653,7 +651,7 @@ In this step, we are going to investigate the basic construction of a container.
 
 #### Pull/Expand/Mount Image
 
-Let's use podman to create a container from scratch. Podman makes it easy to break down each step of the container construction for learning purposes. First, let's pull the image, expand it, and create a new overlay filesystem layer as the read/write root filesystem for the container. To do this, we will use a specially constructed container image which lets us break down the steps instead of starting all at once:
+Let's use Podman to create a container from scratch. Podman makes it easy to break down each step of the container construction for learning purposes. First, let's pull the image, expand it, and create a new overlay filesystem layer as the read/write root filesystem for the container. To do this, we will use a specially constructed container image which lets us break down the steps instead of starting all at once:
 
 ```
 podman create --name on-off-container -v /mnt:/mnt:Z quay.io/fatherlinux/on-off-container
@@ -665,34 +663,35 @@ After running the above command we have storage created. Notice under the STATUS
 podman ps -a
 ```
 
-Try to look at the storage with the mount command (hint, you won't be able to find it):
+Try to look at the storage with the mount command (hint: you won't be able to find it):
 
 ```
-mount | grep -v podman | grep merged
+mount | grep -v Podman | grep merged
 ```
 
-Hopefully you didn't look for too long because you can't see it with the mount command. That's because this storage has been "mounted" in what's called a mount namespace. You can only see the mount from inside the container. To see the mount from outside the container, podman has a cool feature called podman-mount. This command will return the path of a directory which you can poke around in:
+Hopefully you didn't look for too long because you can't see it with the mount command. That's because this storage has been "mounted" in what's called a mount namespace. You can only see the mount from inside the container. To see the mount from outside the container, Podman has a cool feature called Podman-mount. This command will return the path of a directory which you can poke around in:
 
 ```
+podman unshare
 podman mount on-off-container
 ```
 
 The directory you get back is a system level mount point into the overlay filesystem which is used by the container. You can literally change anything in the container's filesystem now. Run a few commands to poke around:
 
 ```
-mount | grep -v podman | grep merged
+mount | grep -v Podman | grep merged
 ```
 
 ```
-ls $(podman mount on-off-container)
+ls $(Podman mount on-off-container)
 ```
 
 ```
-touch $(podman mount on-off-container)/test
+touch $(Podman mount on-off-container)/test
 ```
 
 ```
-ls $(podman mount on-off-container)
+ls $(Podman mount on-off-container)
 ```
 
 See the test file there. You will see this file in our container later when we start it and create a shell inside of it. Let's move on to the spec file...
@@ -702,19 +701,19 @@ See the test file there. You will see this file in our container later when we s
 At this point the container image has been cached locally and mounted, but we don't actually have a spec file for runc yet. Creating a spec file from hand is quite tedious because they are made up of complex JSON with a lot of different options (governed by the OCI runtime spec). Luckily for us, the container engine will create one for us. This exact same spec file can be used by any OCI compliant runtime can consume it (runc, crun, katacontainers, gvisor, etc). Let's run some experiments to show when it's created. First let's inspect the place where it should be:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json|jq .
 ```
 
-The above command errors out because the container engine hasn't created the config.json file yet. We will initiate the creation of this file by using podman combined with a specially constructed container image:
+The above command errors out because the container engine hasn't created the config.json file yet. We will initiate the creation of this file by using Podman combined with a specially constructed container image:
 
 ```
 podman start on-off-container
 ```
 
-Now, the config.json file has been created. Inspect it for a while. Notice that there are options in there that are strikingly similar to the command line options of podman. The spec file really highlights the API:
+Now, the config.json file has been created. Inspect it for a while. Notice that there are options in there that are strikingly similar to the command line options of Podman. The spec file really highlights the API:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json|jq .
 ```
 
 Podman has not started a container, just created the config.json and immediately exited. Notice under the STATUS column, that the container is now in the Exited state:
@@ -737,7 +736,7 @@ touch /mnt/on
 podman start on-off-container
 ```
 
-When podman started the container this time, it fired up top. Notice under the STATUS column, that the container is now in the Up state::
+When Podman started the container this time, it fired up top. Notice under the STATUS column, that the container is now in the Up state::
 
 ```
 podman ps -a
@@ -755,7 +754,7 @@ Now, look for the test file we created before we started the container:
 ls -alh
 ```
 
-The file is there like we would expect. You have just created a container in three basic steps. Did you know and understand that all of this was happening every time you ran a podman or podman command? Now, clean up your work:
+The file is there like we would expect. You have just created a container in three basic steps. Did you know and understand that all of this was happening every time you ran a Podman or Podman command? Now, clean up your work:
 
 ```
 exit
@@ -763,8 +762,8 @@ exit
 
 ```
 podman kill on-off-container
-podman rm on-off-container
-```
+Podman rm on-off-container
+``` -->
 
 ### SELinux & sVirt: Dynamically generated contexts to protect your containers
 
@@ -772,7 +771,7 @@ The goal of this exercise is to gain a basic understanding of SELinux/sVirt. Run
 
 ```
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
-podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
+Podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
 ps -efZ | grep container_t | grep sleep
 ```
@@ -827,9 +826,9 @@ To demonstrate, run two separate containerized sleep processes:
 
 ```
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
-podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
+Podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
-for i in $(podman ps | grep sleep | awk '{print $1}' | grep [0-9]); do find /sys/fs/cgroup/ | grep $i; done
+for i in $(Podman ps | grep sleep | awk '{print $1}' | grep [0-9]); do find /sys/fs/cgroup/ | grep $i; done
 ```
 
 Notice how each containerized process is put into its own cgroup by the container engine. This is quite convenient, similar to sVirt.
@@ -871,7 +870,7 @@ First, lets take a quick look at the contents of a container repository once it'
 ```
 cd /root && mkdir fedora
 cd fedora
-podman pull fedora
+Podman pull fedora
 ```
 
 Now, export the image to a tar, file and extract it:
@@ -930,13 +929,13 @@ The simple file created by runc is a good introduction, but to truly understand 
 
 ```
 podman create --name fedora -t fedora bash
-podman init fedora
+Podman init fedora
 ```
 
-The "podman init" command generates a config.json and we can take a look at it in /var/lib/containers:
+The "Podman init" command generates a config.json and we can take a look at it in /var/lib/containers:
 
 ```
-cat $(find /var/lib/containers/ | grep  $(podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
+cat $(find /var/lib/containers/ | grep  $(Podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
 ```
 
 Take a minute to browse through the json output. See if you can spot directives which come from the container image, the container engine, and the user.
@@ -958,7 +957,7 @@ To get runc to start a new container we need two main things:
 First, lets create (or steal) a RootFS, which is really nothing more than a Linux distribution extracted into a directory. Podman makes this ridiculously easy to to do. The following command will fire up a container, get the ID, mount it, then rsync the filesystem contents out of it into a directory:
 
 ```
-rsync -av $(podman mount $(podman create fedora bash))/ /root/fedora/rootfs/
+rsync -av $(Podman mount $(Podman create fedora bash))/ /root/fedora/rootfs/
 ```
 
 We have ourselves a RootFS directory to work with, check it out:
