@@ -34,7 +34,7 @@ Welcome to this workshop on containers and OpenShift! Today, we will use a hoste
     - [Analyzing Storage and Graph Drivers](#analyzing-storage-and-graph-drivers)
   - [Run Container Images with Hosts](#run-container-images-with-hosts)
     - [Container Engines \& The Linux Kernel](#container-engines--the-linux-kernel)
-    - [SELinux \& sVirt: Dynamically generated contexts to protect your containers](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers)
+    - [SELinux \& sVirt: Dynamically generated contexts to protect your containers (Optional)](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers-optional)
     - [Cgroups: Dynamically created with container instantiation](#cgroups-dynamically-created-with-container-instantiation)
     - [SECCOMP: Limiting how a containerized process can interact with the kernel](#seccomp-limiting-how-a-containerized-process-can-interact-with-the-kernel)
   - [Architect a Better Environment](#architect-a-better-environment)
@@ -765,9 +765,8 @@ podman kill on-off-container
 Podman rm on-off-container
 ``` -->
 
-### SELinux & sVirt: Dynamically generated contexts to protect your containers
-
-The goal of this exercise is to gain a basic understanding of SELinux/sVirt. Run the following commands:
+### SELinux & sVirt: Dynamically generated contexts to protect your containers (Optional)
+Next, let's gain a basic understanding of SELinux/sVirt. Run the following commands:
 
 ```
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
@@ -788,18 +787,18 @@ Notice that each container is labeled with a dynamically generated [Multi Level 
 
 SELinux doesn't just label the processes, it must also label the files accessed by the process. Make a directory for data, and inspect the SELinux label on the directory. Notice the type is set to "user_tmp_t" but there are no MLS labels set:
 
-```
+```bash
 mkdir /tmp/selinux-test
 ```
 
-```
+```bash
 ls -alhZ /tmp/selinux-test/
 ```
 
 
 Example Output:
 
-```
+```bash
 drwxr-xr-x. root root system_u:object_r:container_file_t:s0:c177,c734 .
 drwxrwxrwt. root root system_u:object_r:tmp_t:s0       ..
 ```
@@ -807,14 +806,14 @@ drwxrwxrwt. root root system_u:object_r:tmp_t:s0       ..
 
 Now, run the following command a few times and notice the MLS labels change every time. This is sVirt at work:
 
-```
+```bash
 podman run -t -v /tmp/selinux-test:/tmp/selinux-test:Z registry.access.redhat.com/ubi7/ubi ls -alhZ /tmp/selinux-test
 ```
 
 
 Finally, look at the MLS label set on the directory, it is always the same as the last container that was run. The :Z option auto-labels and bind mounts so that the container can access and change files on the mount point. This prevents any other process from accessing this data and is done transparently to the end user.
 
-```
+```bash
 ls -alhZ /tmp/selinux-test/
 ```
 
@@ -824,7 +823,7 @@ The goal of this exercise is to gain a basic understanding of how containers pre
 
 To demonstrate, run two separate containerized sleep processes:
 
-```
+```bash
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 Podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
@@ -835,16 +834,24 @@ Notice how each containerized process is put into its own cgroup by the containe
 
 ### SECCOMP: Limiting how a containerized process can interact with the kernel
 
-The goal of this exercise is to gain a basic understanding of SECCOMP. Think of a SECCOMP as a firewall which can be configured to block certain system calls.  While optional, and not configured by default, this can be a very powerful tool to block misbehaved containers. Take a look at this sample:
+Now let's gain a basic understanding of SECCOMP. Think of a SECCOMP as a firewall which can be configured to block certain system calls.  While optional, and not configured by default, this can be a very powerful tool to block misbehaved containers. Take a look at this sample below. Create a file named `chmod.json` and copy this JSON into it.
 
-```
-cat ~/labs/lab3-step5/chmod.json
+```json
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "syscalls": [
+    {
+      "name": "fchmodat",
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}
 ```
 
 Now, run a container with this profile and test if it works.
 
 ```
-podman run -it --security-opt seccomp=/root/labs/lab3-step5/chmod.json registry.access.redhat.com/ubi7/ubi chmod 777 /etc/hosts
+podman run -it --security-opt seccomp=~/chmod.json registry.access.redhat.com/ubi7/ubi chmod 777 /etc/hosts
 ```
 
 Notice how the chmod system call is blocked.
@@ -853,7 +860,7 @@ Notice how the chmod system call is blocked.
 
 ### Overview of The OCI Specifications
 
-The goal of this lab is to get a basic understanding of the three Open Containers Initiative (OCI) specificaitons that govern finding, running, building and sharing container - image, runtime, and distribution. At the highest level, containers are two things - files and processes - at rest and running. First, we will take a look at what makes up a [Container Repository](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on disk, then we will look at what directives are defined to create a running [Container](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.j2uq93kgxe0e).
+Let's now turn to the three Open Containers Initiative (OCI) specificaitons that govern finding, running, building and sharing containers - image, runtime, and distribution. At the highest level, containers are two things - files and processes - at rest and running. First, we will take a look at what makes up a [container repository](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.20722ydfjdj8) on disk, then we will look at what directives are defined to create a running container.
 
 If you are interested in a slightly deeper understanding, take a few minutes to look at the OCI  work, it's all publicly available in GitHub repositories:
 
@@ -861,16 +868,16 @@ If you are interested in a slightly deeper understanding, take a few minutes to 
 - [The Runtime Specification Abstract](//github.com/opencontainers/runtime-spec/blob/master/spec.md)
 - [The Distributions Specification Use Cases](https://github.com/opencontainers/distribution-spec/blob/master/spec.md#use-cases)
 
-Now, lets run some experiments to better understand these specifications.
+Now, let's run some experiments to better understand these specifications.
 
 ### The OCI Image Specification
 
-First, lets take a quick look at the contents of a container repository once it's uncompressed. We will use a utility you may have seen before called Podman. The syntax is nearly identical to Docker. Create a working directory for our experiment, then make sure the fedora image is cached locally:
+First, lets take a quick look at the contents of a container repository once it's uncompressed. Create a working directory for our experiment, then make sure the Fedora image is cached locally:
 
 ```
-cd /root && mkdir fedora
+mkdir fedora
 cd fedora
-Podman pull fedora
+podman pull fedora
 ```
 
 Now, export the image to a tar, file and extract it:
@@ -888,11 +895,13 @@ Finally, let's take a look at three important parts of the container repository 
 
 In the Manifest, you should see one or more Config and Layers entries:
 
+(Note if `jq` is not installed, run `sudo dnf install -y jq` first)
+
 ```
 cat manifest.json | jq
 ```
 
-In the Config file, notice all of the meta data that looks strikingly similar to command line options in Docker & Podman:
+In the Config file, note that all of the metadata is similar to command line options in Docker & Podman:
 
 ```
 cat $(cat manifest.json | awk -F 'Config' '{print $2}' | awk -F '["]' '{print $3}') | jq
@@ -904,88 +913,89 @@ Each Image Layer is just a tar file. When all of the necessary tar files are ext
 tar tvf $(cat manifest.json | awk -F 'Layers' '{print $2}' | awk -F '["]' '{print $3}')
 ```
 
-The take away from inspecting the three major parts of a container repository is that they are really just the wittiest use of tarballs ever invented. Now, that we understand what is on disk, lets move onto the runtime.
+The take away from inspecting the three major parts of a container repository is that they are really just a clever use of tarballs. Now, that we understand what is on disk, lets move onto the runtime.
 
 ### The OCI Runtime Specification
 
-This specification governs the format of the file that is passed to [Container Runtime](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo55). Every OCI compliant runtime will accept this file format, including runc, crun, Kata, gVisor, Railcar, etc. Typically, this file is constructed by a [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) such as CRI-O, Podman, containerd or Docker. These files can be created manually, but it's a tedious process. Instead, we are going to do couple of experiments so that you can get a feel for this file without having to create one manually.
+This specification governs the format of the file that is passed to the [container runtime](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo55). Every OCI compliant runtime will accept this file format, including runc, crun, Kata, gVisor, Railcar, etc. Typically, this file is constructed by a [container engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) such as CRI-O, Podman, containerd or Docker. These files can be created manually, but it's a tedious process. Instead, we are going to do couple of experiments so that you can get a feel for this file without having to create one manually.
 
 Before we begin our experiments, you need to have a basic understanding of the inputs that go into creating this spec file:
 
-1. The [Container Image](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo55) comes with a config.json which provides some input. We inspected this file in the last section on the image specification. These inputs are a combination of things provided by the image builder (Example: CMD) as well as defaults specified by the build tool (Example: Architecture). The inputs specified at build time can be thought of as a way for the image builder to communicate with the image consumer about how the image should be run.
+1. The [container image](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo55) comes with a config.json which provides some input. We inspected this file in the last section on the image specification. These inputs are a combination of things provided by the image builder (Example: `Cmd`) as well as defaults specified by the build tool (Example: `architecture`). The inputs specified at build time can be thought of as a way for the image builder to communicate with the image consumer about how the image should be run.
 
 2. The container engine itself also provides some default inputs. Some of these can be configured in the configuration for the container engine (Example: SECCOMP profiles), some are dynamically generated by the container engine (Example: sVirt/SELinux contexts, or Bind Mounts - aka the copy on write layer which gets mounted in the container's namespace), while others are hardcoded into the container engine (Example: the default namespaces to utilize).
 
-3. The command line options specified by the user of the container engine (or robot in Kubernetes' case) can override many of the defaults provided in the image or by the container engine. Some of these are simple things like bind mounts (Example: -v /data:/data) or more complex like security options (Example: --privileged which disables a lot of technologies in the kernel).
+3. The command line options specified by the user of the container engine (or robot in Kubernetes' case) can override many of the defaults provided in the image or by the container engine. Some of these are simple things like bind mounts (Example: `-v /data:/data`) or more complex like security options (Example: `--privileged` which disables a lot of technologies in the kernel).
 
-Now, let's start with some experiments. Being the reference implementation for the runtime specifiction, runc has the ability to create a very simple spec file. Let's create one and take a quick look at the fairly simple set of directives:
+Now, let's start with some experiments. Being the reference implementation for the runtime specifiction, `runc` has the ability to create a very simple spec file. Let's create one and take a quick look at the fairly simple set of directives:
 
 ```
-cd /root/fedora && runc spec
+sudo dnf install -y runc
+cd ~/fedora && runc spec
 cat config.json | jq
 ```
 
-The simple file created by runc is a good introduction, but to truly understand the breadth of what a container engine does, we need to look at a more complex example. Podman has the ability to create a container and generate a spec file without actually starting the container:
+The simple file created by `runc` is a good introduction, but to truly understand the breadth of what a container engine does, we need to look at a more complex example. Podman has the ability to create a container and generate a spec file without actually starting the container:
 
 ```
 podman create --name fedora -t fedora bash
-Podman init fedora
+podman init fedora
 ```
 
-The "Podman init" command generates a config.json and we can take a look at it in /var/lib/containers:
+The "podman init" command generates a config.json and we can take a look at it in /home/student/.local/share/containers/storage/overlay-containers:
 
 ```
-cat $(find /var/lib/containers/ | grep  $(Podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
+cat $(find /home/student/.local/share/containers/storage/overlay-containers/ | grep  $(Podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
 ```
 
 Take a minute to browse through the json output. See if you can spot directives which come from the container image, the container engine, and the user.
 
-Now that we have a basic understanding of the runtime spec file, lets move on to starting a container...
+Now that we have a basic understanding of the runtime spec file, let's move on to starting a container...
 
 ### The OCI Runtime Reference Implementation
 
-The goal of this lab is to learn how to use the container runtime to communicate with the Linux kernel to start a container. You will build a simple set of metadata, and start a container. This will give you insight into what the [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) is actually doing every time you run a command.
+Let's now learn how to use the container runtime to communicate with the Linux kernel to start a container. You will build a simple set of metadata, and start a container. This will give you insight into what the [container engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) is actually doing every time you run a command.
 
 #### Setup
 
-To get runc to start a new container we need two main things:
+To get `runc` to start a new container we need two main things:
 
 1. A filesystem to mount (often called a RootFS)
 
 2. A config.json file
 
-First, lets create (or steal) a RootFS, which is really nothing more than a Linux distribution extracted into a directory. Podman makes this ridiculously easy to to do. The following command will fire up a container, get the ID, mount it, then rsync the filesystem contents out of it into a directory:
+First, lets create (or steal) a RootFS, which is really nothing more than a Linux distribution extracted into a directory. Podman makes this ridiculously easy to to do. The following command will fire up a container, get the ID, mount it, then `rsync` the filesystem contents out of it into a directory:
 
 ```
-rsync -av $(Podman mount $(Podman create fedora bash))/ /root/fedora/rootfs/
+rsync -av $(podman mount $(podman create fedora bash))/ ~/fedora/rootfs/
 ```
 
 We have ourselves a RootFS directory to work with, check it out:
 
 ```
-ls -alh /root/fedora/rootfs
+ls -alh ~/fedora/rootfs
 ```
 
 Now that we have a RootFS, lets create a spec file and modify it:
 
 ```
-rm -rf /root/fedora/config.json
-runc spec -b /root/fedora/
-sed -i 's/"terminal": true/"terminal": false/' /root/fedora/config.json
+rm -rf ~/fedora/config.json
+runc spec -b ~/fedora/
+sed -i 's/"terminal": true/"terminal": false/' ~/fedora/config.json
 ```
 
 Now, we have ourselves a full "bundle" which is a collequial way of referring to the RootFS and Config together in one directory:
 
 ```
-ls -alh /root/fedora
+ls -alh ~/fedora
 ```
 
 #### Experiments
 
-First, lets create an empty container. This essentially creates the user space definition for the container, but no processes are spawned yet:
+First, let's create an empty container. This essentially creates the user space definition for the container, but no processes are spawned yet:
 
 ```
-runc create -b /root/fedora/ fedora
+runc create -b ~/fedora/ fedora
 ```
 
 List the created containers:
@@ -1019,7 +1029,7 @@ runc delete fedora
 runc list
 ```
 
-In summary, we have learned how to create containers with a terse little program called runc. This is the exact same program used by every major container engine on the planet. In production, you would never create containers like this, but it's useful to understand what is going on under the hood in CRI-O, Podman and Docker. When you run into new projects like Kata, gVisor, and others, you will now understand exactly how and where they fit in into the software stack.
+In summary, we have learned how to create containers with a terse little program called `runc`. **This is the exact same program used by every major container engine on the planet.** In production, you would never create containers like this, but it's useful to understand what is going on under the hood in CRI-O, Podman and Docker. When you run into new projects like Kata, gVisor, and others, you will now understand exactly how and where they fit in into the software stack.
 
 ## Next Up
 
