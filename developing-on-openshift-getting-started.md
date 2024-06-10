@@ -34,11 +34,11 @@
     - [Uninstall](#uninstall)
   - [What's Next?](#whats-next)
 
-Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructor, along with these instructions, as we journey from simple Linux containers to advanced container orchestration using Red Hat OpenShift.
+Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructors, along with these instructions, as we journey through advanced container orchestration using Red Hat OpenShift.
 
 Let's begin by logging into the environment provided by your instructors and going to OpenShift Dev Spaces.
 
-![Web Console Login](./assets/developing-on-openshift-getting-started/assets/web-console-login.png)
+![Web Console Login](./assets/images/sign-in.png)
 
 |NOTE:|
 |----|
