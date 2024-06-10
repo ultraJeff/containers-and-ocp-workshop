@@ -162,7 +162,7 @@ podman ps -a
 
 Now, let's move on to some features that differentiates Podman from Docker. Specifically, let's cover the two most popular reasons - Podman runs without a daemon (daemonless) and without root (rootless). Podman is an interactive command more like bash, and like bash it can be run as a regular user (aka. rootless).
 
-<!-- The container host we are working with already has a user called RHEL, so let's switch over to it. Note, we set a couple of environment variables manually because we're using the switch user command. These would normally be set at login:
+The container host we are working with already has a user called RHEL, so let's switch over to it. Note, we set a couple of environment variables manually because we're using the switch user command. These would normally be set at login:
 
 ```
 su - rhel
@@ -190,7 +190,7 @@ You should see something similar to:
          └─bash(ipc,mnt,net,pid,uts)
 ```
 
-There's no Podman process, which might be confusing. Let's explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of metadata in `~/.local/share/containers` (`/var/lib/containers` is only used for containers started by root) which tracks which containers are created, running, and stopped (killed). The metadata that Podman tracks is what enables a `podman ps` command to work.
+There's no Podman process, which might be confusing. Lets explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of metadata in `~/.local/share/containers` (`/var/lib/containers` is only used for containers started by root) which tracks which containers are created, running, and stopped (killed). The metadata that Podman tracks is what enables a `podman ps` command to work.
 
 In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before runc called conmon (Container Monitor). The conmon utility disconnects the container from the engine by doing forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
 
@@ -260,13 +260,13 @@ The above commands show how easy and elegant Podman is to use. Podman is like a 
 
 ## Buildah: Granularity & Control
 
-Now let's introduce you to Buildah and the flexibility it provides when you need to build container images your way. There are a lot of different use cases that just "feel natural" when building container images, but you often can't quite wire together and elegant solutions with the client server model of existing container engines. Enter Buildah. To get started, lets introduce some basic decisions you need to think through when building a new container image.
+The goal of this lab is to introduce you to Buildah and the flexibility it provides when you need to build container images your way. There are a lot of different use cases that just "feel natural" when building container images, but you often, you can't quite wire together and elegant solutions with the client server model of existing container engines. In comes Buildah. To get started, lets introduce some basic decisions you need to think through when building a new container image.
 
-1. **Image vs. Scratch:** Do you want to start with an existing container image as the source for your new container image, or would you prefer to build completely from scratch? Source images are the most common route, but it can be nice to build from scratch if you have small, statically linked binaries.
+1. Image vs. Scratch: Do you want to start with an existing container image as the source for your new container image, or would you prefer to build completely from scratch? Source images are the most common route, but it can be nice to build from scratch if you have small, statically linked binaries.
 
-2. **Inside vs. Outside:** Do you want to execute the commands to build the next container image layer inside the container, or would you prefer to use the tools on the host to build the image? This is completely new concept with Buildah, but with existing container engines, you always build from within the container. Building outside the container image can be useful when you want to build a smaller container image, or an image that will always be ran read only, and never built upon. Things like Java would normally be built in the container because they typically need a JVM running, but installing RPMs might happen from outside because you don't want the RPM database in the container.
+2. Inside vs. Outside: Do you want to execute the commands to build the next container image layer inside the container, or would you prefer to use the tools on the host to build the image? This is completely new concept with Buildah, but with existing container engines, you always build from within the container. Building outside the container image can be useful when you want to build a smaller container image, or an image that will always be ran read only, and never built upon. Things like Java would normally be built in the container because they typically need a JVM running, but installing RPMs might happen from outside because you don't want the RPM database in the container.
 
-3. **External vs. Internal Data:** Do you have everything you need to build the image from within the image? Or, do you need to access cached data outside of the build process? For example, It might be convenient to mount a large cached RPM cache inside the container during build, but you would never want to carry that around in the production image. The use cases for build time mounts range from SSH keys to Java build artifacts - for more ideas, see this [GitHub issue](https://github.com/moby/moby/issues/14080).
+3. External vs. Internal Data: Do you have everything you need to build the image from within the image? Or, do you need to access cached data outside of the build process? For example, It might be convenient to mount a large cached RPM cache inside the container during build, but you would never want to carry that around in the production image. The use cases for build time mounts range from SSH keys to Java build artifacts - for more ideas, see this [GitHub issue](https://github.com/moby/moby/issues/14080).
 
 Alright, let's walk through some common scenarios with Buildah.
 
@@ -504,6 +504,7 @@ ls -alh ~/fedora-skopeo
 
 The Config and Image Layers are there, but remember we need to rely on a [Graph Driver](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.kvykojph407z) in a [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) to map them into a RootFS.
 
+<!-- 
 ### Moving Between Container Storage (Podman & Docker)
 
 First, let's do a little hack to install Docker CE side by side with Podman on RHEL 8. Don't do this on a production system as this will overwrite the version of runc provided by Red Hat:
@@ -532,6 +533,7 @@ docker images | grep registry.fedoraproject.org
 ```
 
 This can be useful when testing and getting comfortable with other OCI complaint tools like Podman, Buildah, and Skopeo. Sometimes, you aren't quite ready to let go of what you know so having them side by side can be useful. Remember though, this isn't supported because it replaces the runc provided by Red Hat.
+--->
 
 ### Moving Between Container Registries
 
@@ -553,6 +555,7 @@ exit
 
 You have a new tool in your tool belt for sharing and moving containers. Hopefully, you find other uses for Skopeo.
 
+<!-- 
 ## CRIU: Checkpointing and Restoring
 
 With some help from a program called CRIU, Podman can checkpoint and restore containers on the same host. This can be useful with workloads that have a long startup period or require a long time to warm up caches. For example, large memcached servers, database, or even Java workloads can take several minutes or even hours to reach maximum throughput performance. This is often referred to as cache warming.
@@ -697,6 +700,7 @@ We can also verify that there is a new rule in this policy to allow our containe
 sesearch -A -s home_test.process -t home_root_t -c dir -p read
 ```
 
+-->
 ### Conclusions
 
 It's always best to have SELinux enabled, especially with containers. It's so easy to create a custom SELinux policy with Udica, that you should never disable it. If you'd like to understand Udica a bit deeper, check out this great article, [Use udica to build SELinux policy for containers](https://fedoramagazine.org/use-udica-to-build-selinux-policy-for-containers/) by Lukas Vrabec. Now, let's move on to another tool.
