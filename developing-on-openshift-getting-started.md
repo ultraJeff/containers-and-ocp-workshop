@@ -40,6 +40,9 @@ Let's begin by logging into the environment provided by your instructors and goi
 
 ![Web Console Login](./assets/developing-on-openshift-getting-started/assets/web-console-login.png)
 
+Get your OpenShift User ID and Password from the registration page:
+![OpenShift Credentials](./assets/developing-on-openshift-getting-started/assets/openshift-user-password.png)
+
 |NOTE:|
 |----|
 |You might see the following warning notification due to using an untrusted security certificate.
@@ -127,6 +130,7 @@ Take a moment to note that we could fire up 50 copies of this same application i
 
 ## Deploying with an Image
 
+<!--
 ### Working with the Command Line Interface (CLI)
 
 You can access the Red Hat OpenShift CLI with the command `oc`. Using the `oc` command lets you work with the entire OpenShift cluster and deploy new applications.
@@ -149,7 +153,7 @@ You log into OpenShift from the command line using the `oc login` command.
 `Step 1:` Run the following command in the terminal window to the left:
 
 ```
-oc login -u admin -p LAB_PASSWORD LAB_API_ENDPOINT --insecure-skip-tls-verify=true
+oc login -u <lab user id> -p <lab password? LAB_API_ENDPOINT --insecure-skip-tls-verify=true
 ```
 
 Upon successful login, you'll get results similar to the following:
@@ -183,6 +187,7 @@ admin
  You've logged in to OpenShift using the `oc` command line tool.
 
 ----
+-->
 
 This topic focuses on learning how to log into the Red Hat OpenShift web console and then create an application once logged in.
 
@@ -196,8 +201,8 @@ Your first task is to log into OpenShift from the web console.
 Click the **Web Console** tab from the horizontal menu bar over the terminal to the left to open the OpenShift web console.
 
 You will be presented with the OpenShift login screen. Use the following credentials to log in.
-* **Username:** `admin`
-* **Password:** `<LAB_PASSWORD>`
+* **Username:** `<lab user id>`
+* **Password:** `<lab password>`
 
 Log into the OpenShift web console, as shown in the figure below.
 
@@ -438,6 +443,7 @@ Clicking the icon opens the application's web page in a browser as shown in th f
  You have now located the application's **route** URL in the OpenShift web console. Also, you've learned how to open the application in a web page from the **Resource** tab in the application detail, and also directly from the application's circular graphic in the **Topology** view.
 
 This is the final step in this track.
+
 
 ## Deploying with a Helm Chart
 
