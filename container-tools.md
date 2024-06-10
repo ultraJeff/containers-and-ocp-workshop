@@ -15,10 +15,6 @@
     - [Pulling Images](#pulling-images)
     - [Moving Between Container Registries](#moving-between-container-registries)
     - [Conclusions](#conclusions-1)
-  - [Udica: Custom SELinux Policies](#udica-custom-selinux-policies)
-    - [Conclusions](#conclusions-2)
-  - [OSCAP Podman: Trust but Verify](#oscap-podman-trust-but-verify)
-    - [Conclusions](#conclusions-3)
   - [Next Up](#next-up)
 
 
@@ -550,6 +546,7 @@ exit
 
 You have a new tool in your tool belt for sharing and moving containers. Hopefully, you find other uses for Skopeo.
 
+<!-- Need root -->
 <!-- ## CRIU: Checkpointing and Restoring
 
 With some help from a program called CRIU, Podman can checkpoint and restore containers on the same host. This can be useful with workloads that have a long startup period or require a long time to warm up caches. For example, large memcached servers, database, or even Java workloads can take several minutes or even hours to reach maximum throughput performance. This is often referred to as cache warming.
@@ -634,7 +631,8 @@ podman kill -a
 
 ### Conclusions
 
-Checkpointing and restoring containers is easy with CRIU and Podman. As part of the container-tools application streams, specific versions of Podman and CRIU are tested and verified to work together (not all versions of Podman and CRIU are guaranteed to work together). Now, let's move on to some more tools. -->
+Checkpointing and restoring containers is easy with CRIU and Podman. As part of the container-tools application streams, specific versions of Podman and CRIU are tested and verified to work together (not all versions of Podman and CRIU are guaranteed to work together). Now, let's move on to some more tools.
+
 
 ## Udica: Custom SELinux Policies
 
@@ -719,6 +717,7 @@ Check it out here: [UBI 8.0-126 image](https://catalog.redhat.com/software/conta
 Now, let's take a more detailed look, using the oscap-podman command:
 
 ```
+sudo dnf install -y openscap-utils
 oscap-podman registry.access.redhat.com/ubi8/ubi:8.0-126 oval eval --report ./assets/html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
 ```
 
@@ -735,6 +734,7 @@ Look at the new report from thr *OSCAP Report latest* Tab.
 ### Conclusions
 
 In general you should almost never see any unapplied patches in this latest build of UBI. If you do, it's like a small window between the time that Red Hat Product Security has issued a CVE, and our product team has rebuilt and published the UBI image. The oscap-podman command allows you to verify this and is useful in "trust but verify" operations like CI/CD system tests. For more information and deeper dive on OSCAP-Podman, check out this great video by Brian Smith: [Scanning Containers for Vulnerabilities on RHEL 8.2 With OpenSCAP and Podman](https://www.youtube.com/watch?v=nQmIcK1vvYc)
+-->
 
 ## Next Up
 
