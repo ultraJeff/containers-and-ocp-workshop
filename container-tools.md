@@ -2,7 +2,6 @@
 
 - [Red Hat Container Tools](#red-hat-container-tools)
   - [An Overview of Container Tools](#an-overview-of-container-tools)
-  - [Using the Fast and Stable Streams](#using-the-fast-and-stable-streams)
   - [Podman: Familiar Territory](#podman-familiar-territory)
   - [Buildah: Granularity \& Control](#buildah-granularity--control)
     - [Prep Work](#prep-work)
@@ -28,16 +27,16 @@
 
 ## An Overview of Container Tools
 
-In this lab we're going to cover a plethora of container tools available in Red Hat Enterprise Linux (RHEL), including Podman, Buildah, Skopeo, CRIU and Udica. Before we get into the specific tools, it's important to understand how these are tools are provided to the end user in the Red Hat ecosystem.
+In this chapter we're going to cover a plethora of container tools available in Red Hat Enterprise Linux (RHEL), including Podman, Buildah, Skopeo, CRIU and Udica. Before we get into the specific tools, it's important to understand how these are tools are provided to the end user in the Red Hat ecosystem.
 
-The RHEL kernel, systemd, and the container tools, centered around github.com/containers and github.com/cri-o/cri-o, serve as the foundation for both RHEL Server as well as RHEL CoreOS. RHEL Server is a flexible, general purpose operating system which can be customized for many different use cases. On the other hand, RHEL CoreOS is a minimal, purpose built operating system intended to be consumed within automated environments like OpenShift. This lab will specifically cover the tools available in RHEL Server, but much of what you learn is useful with CoreOS which is built from the same bits, but packaged specifically for OpenShift and Edge use cases.
+The RHEL kernel, systemd, and the container tools, centered around [containers](github.com/containers) and [CRI-O](github.com/cri-o/cri-o), serve as the foundation for both **RHEL Server** as well as **RHEL CoreOS**. **RHEL Server** is a flexible, general purpose operating system which can be customized for many different use cases. On the other hand, **RHEL CoreOS** is a minimal, purpose built operating system intended to be consumed within automated environments like OpenShift. This lab will specifically cover the tools available in **RHEL Server**, but much of what you learn is useful with **RHEL CoreOS** which is built from the same bits, but packaged specifically for OpenShift and Edge use cases.
 
 Here's a quick overview of how to think about RHEL Server versus RHEL CoreOS:
 
 1. General Purpose: User -> Podman -> RHEL Server
 2. OpenShift: User -> Kubernetes API -> Kubelet -> CRI-O -> RHEL CoreOS
 
-In a RHEL Server environment, the end user will create containers directly on the container host with Podman. In an OpenShift environment, the end user will create containers through the Kubernetes API - users generally do not interact directly with CRI-O on individual hosts in the cluster. Stated another way, Podman is the primary container interface in RHEL, while Kubernetes is the primary interface in OpenShift.
+In a RHEL Server environment, the end user will create containers directly on the container host with Podman. In an OpenShift environment, the end user will create containers through the Kubernetes API - users generally do not interact directly with CRI-O on individual hosts in the cluster. **Stated another way, Podman is the primary container interface in RHEL, while Kubernetes is the primary interface in OpenShift**.
 
 For the rest of this lab, we will focus on the container tools provided in RHEL Server. The launch of RHEL8 introduced the concept of [Application Streams](https://www.redhat.com/en/blog/introduction-appstreams-and-modules-red-hat-enterprise-linux), which provide users with access to the latest versions of software like Python, Ruby, and Podman. These Application Streams have different, and often shorter life cycles than RHEL (10+ years). Specifically, RHEL8 Server provides users with two types of Application Streams for Container tools:
 
@@ -48,7 +47,8 @@ With either stream, the underlying RHEL kernel, systemd, and other packages are 
 
 For a deeper dive, check out [RHEL 8 enables containers with the tools of software craftsmanship](https://www.redhat.com/en/blog/rhel-8-enables-containers-tools-software-craftsmanship-0). Now, let's move on to installing and using these different streams of software.
 
-## Using the Fast and Stable Streams
+<!-- TODO yum module list doesn't list container-tools -->
+<!-- ## Using the Fast and Stable Streams
 
 As mentioned in the previous step, there are two main types of streams. To view them, run the following command:
 
@@ -126,7 +126,7 @@ yum module reset -y container-tools
 yum module install -y container-tools:rhel8
 ```
 
-Notice how easy it was to move between the stable streams and the fast moving stream. This is the power of modularity. Now, let's move on to using the actual tools.
+Notice how easy it was to move between the stable streams and the fast moving stream. This is the power of modularity. Now, let's move on to using the actual tools. -->
 
 ## Podman: Familiar Territory
 
@@ -134,44 +134,44 @@ The goal of this lab is to introduce you to Podman and some of the features that
 
 Pull an image:
 
-```
+```bash
 podman pull ubi8
 ```
 
 List locally cached images:
 
-```
+```bash
 podman images
 ```
 
 Start a container and run bash interactively in the local terminal. When ready, exit:
 
-```
+```bash
 podman run -it ubi8 bash
 ```
 
-```
+```bash
 exit
 ```
 
 List running containers:
 
-```
+```bash
 podman ps -a
 ```
 
-Now, let's move on to some features that differentiates Podman from Docker. Specifically, let's cover the two most popular reasons - Podman runs with a daemon (daemonless) and without root (rootless). Podman does not have a daemon, it's an interactive command more like bash, and like bash it can be run as a regular user (aka. rootless).
+Now, let's move on to some features that differentiates Podman from Docker. Specifically, let's cover the two most popular reasons - Podman runs without a daemon (daemonless) and without root (rootless). Podman is an interactive command more like bash, and like bash it can be run as a regular user (aka. rootless).
 
-The container host we are working with already has a user called RHEL, so let's switch over to it. Note, we set a couple of environment variables manually because we're using the switch user command. These would normally be set at login:
+<!-- The container host we are working with already has a user called RHEL, so let's switch over to it. Note, we set a couple of environment variables manually because we're using the switch user command. These would normally be set at login:
 
 ```
 su - rhel
 export XDG_RUNTIME_DIR=/home/rhel
-```
+``` -->
 
 Now, fire up a simple container in the background:
 
-```
+```bash
 podman run -id ubi8 bash
 ```
 
@@ -179,20 +179,20 @@ Now, lets analyze a couple of interesting things that makes Podman different tha
 
 Inspect the process tree on the system:
 
-```
+```bash
 pstree -Slnc
 ```
 
 You should see something similar to:
 
-```
+```bash
 └─conmon─┬─{conmon}
          └─bash(ipc,mnt,net,pid,uts)
 ```
 
-There's no Podman process, which might be confusing. Lets explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of meta-data in ~/.local/share/containers (/var/lib/containers is only used for containers started by root) which tracks which containers are created, running, and stopped (killed). The meta-data that Podman tracks is what enables a "podman ps" command to work.
+There's no Podman process, which might be confusing. Lets explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of metadata in `~/.local/share/containers` (`/var/lib/containers` is only used for containers started by root) which tracks which containers are created, running, and stopped (killed). The metadata that Podman tracks is what enables a `podman ps` command to work.
 
-In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exit exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before runc called conmon (Container Monitor). The conmon utility disconnects the container from the engine by doing forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
+In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before runc called conmon (Container Monitor). The conmon utility disconnects the container from the engine by doing forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
 
 `bash -> podman -> conmon -> conmon -> runc -> bash`
 
@@ -208,52 +208,51 @@ Conmon is a very small C program that monitors the standard in, standard error, 
 
 Podman doesn't require a daemon and it doesn't require root. These two features really set Podman apart from Docker. Even when you use the Docker CLI as a user, it connects to a daemon running as root, so the user always has the ability escalate a process to root and do whatever they want on the system. Worse, it bypasses sudo rules so it's not easy to track down who did it.
 
-Now, let's move on to some other really interesting features. Rootless containers use a kernel feature called User Namespaces. This maps the one or more user IDs in the container to one or more user IDs outside of the container. This includes the root user ID in the container as well as any others which might be used by programs like Nginx or Apache.
+Now, let's move on to some other really interesting features. Rootless containers use a kernel feature called User Namespaces. This maps the one or more user IDs in the container to one or more user IDs outside of the container. This includes the root user ID in the container as well as any others which might be used by programs like nginx or Apache.
 
 Podman makes it super easy to see this mapping. Start an nginx container to see the user and group mapping in action:
 
-
-```
+```bash
 podman run -id registry.access.redhat.com/rhscl/nginx-114-rhel7 nginx -g 'daemon off;'
 ```
 
 Now, execute the Podman bash command:
 
-```
+```bash
 podman top -l args huser hgroup hpid user group pid seccomp label
 ```
 
-Notice that the host user, group and process ID  ''in'' the container all map to different and real IDs on the host system. The container thinks that nginx is running as the user ''default'' and the group ''root'' but really it's running as an arbitrary user and group. This user and group are selected from a range configured for the ''rhel'' user account on this system. This list can easily be inspected with the following commands:
+Notice that the host user, group and process ID *in* the container all map to different and real IDs on the host system. The container thinks that nginx is running as the user `default` and the group `root` but really it's running as an arbitrary user and group. This user and group are selected from a range configured for the `student` user account on this system. This list can easily be inspected with the following commands:
 
-```
+```shell
 cat /etc/subuid
 ```
 
 You will see something similar to this:
 
-```
-rhel:165536:65536
+```shell
+student:165536:65536
 ```
 
-The first number represents the starting user ID, and the second number represents the number of user IDs which can be used from the starting number. So, in this example, our RHEL user can use 65,535 user IDs starting with user ID 165536. The Podman bash command should show you that nginx is running in this range of UIDs.
+The first number represents the starting user ID, and the second number represents the number of user IDs which can be used from the starting number. So, in this example, our `student` user can use 65,535 user IDs starting with user ID 165536. The Podman bash command should show you that nginx is running in this range of UIDs.
 
 The user ID mappings on your system might be different because shadow utilities (useradd, usderdel, usermod, groupadd, etc) automatically creates these mappings when a user is added. As a side note, if you've updated from an older version of RHEL, you might need to add entries to /etc/subuid and /etc/subgid manually.
 
 OK, now stop all of the running containers. No more one liners like with Docker, it's just built in with Podman:
 
-```
+```bash
 podman kill --all
 ```
 
 Remove all of the actively defined containers. It should be noted that this might be described as deleting the copy-on-write layer, config.json (commonly referred to as the Config Bundle) as well as any state data (whether the container is defined, running, etc):
 
-```
+```bash
 podman rm --all
 ```
 
 We can even delete all of the locally cached images with a single command:
 
-```
+```bash
 podman rmi --all
 ```
 
@@ -470,17 +469,17 @@ In this step, we are going to do a couple of simple exercises with Skopeo to giv
 
 ### Remotely Inspecting Images
 
-First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image remotely before pulling it down to the local cache. This allows us to inspect the meta-data of the image and see if we really want to use it, without synchronizing it to the local image cache:
+First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image remotely before pulling it down to the local cache. This allows us to inspect the metadata of the image and see if we really want to use it, without synchronizing it to the local image cache:
 
 ```
 skopeo inspect docker://registry.fedoraproject.org/fedora
 ```
 
-We can easily see the "Architecture" and "Os" meta-data which tells us a lot about the image. We can also see the labels, which are consumed by most container engines, and passed to the runtime to be constructed as environment variables. By comparison, here's how to see this meta-data in a running container:
+We can easily see the "Architecture" and "Os" metadata which tells us a lot about the image. We can also see the labels, which are consumed by most container engines, and passed to the runtime to be constructed as environment variables. By comparison, here's how to see this metadata in a running container:
 
 ```
-podman run --name meta-data-container -id registry.fedoraproject.org/fedora bash
-podman inspect meta-data-container
+podman run --name metadata-container -id registry.fedoraproject.org/fedora bash
+podman inspect metadata-container
 ```
 
 ### Pulling Images
@@ -561,7 +560,7 @@ With some help from a program called CRIU, Podman can checkpoint and restore con
 If this doesn't quite make sense, let's talk about it in the context of container creation and deletion. Podman allow you to break the creation and deletion of containers down into very granular steps. Here's what the life cycle of a container looks like from start to finish:
 
 1. podman pull - Pull the container image
-2. podman create - Add tracking meta-data to /var/lib/containers or .local/share/containers
+2. podman create - Add tracking metadata to /var/lib/containers or .local/share/containers
 3. podman mount - Create a copy-on-write layer and mount the container image with a read/write layer above it
 4. podman init - Create a config.json file
 5. podman start - Run the workload by handing the config.json and root file system to runc
@@ -574,7 +573,7 @@ To understand CRIU, you need to understand step 6. When this step is executed, P
 
 
 1. podman pull - Pull the container image
-2. podman create - Add tracking meta-data to /var/lib/containers or .local/share/containers
+2. podman create - Add tracking metadata to /var/lib/containers or .local/share/containers
 3. podman mount - Create a copy-on-write layer and mount the container image with a read/write layer above it
 4. podman init - Create a config.json file
 5. podman start - Run the workload by handing the config.json and root file system to runc
@@ -630,7 +629,7 @@ Verify the contents of memory and disk are being used and the numbers are increm
 podman logs -l
 ```
 
-We're all done, so clean up. This will kill the process, delete the contents of the copy-on-write layer, and remove all of the meta-data for all containers:
+We're all done, so clean up. This will kill the process, delete the contents of the copy-on-write layer, and remove all of the metadata for all containers:
 
 ```
 podman kill -a
@@ -656,7 +655,7 @@ The above command will fail because the default SELinux policy does not allow co
 sesearch -A -s container_t -t home_root_t -c dir -p read
 ```
 
-With Udica, we can quickly and easily configure SELinxux to allow us to mount /home as root. First, we have to extract the meta-data from our container:
+With Udica, we can quickly and easily configure SELinxux to allow us to mount /home as root. First, we have to extract the metadata from our container:
 
 ```
 podman inspect home-test > home-test.json
