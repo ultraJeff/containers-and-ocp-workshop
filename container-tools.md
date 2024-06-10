@@ -13,15 +13,8 @@
   - [Skopeo: Moving \& Sharing](#skopeo-moving--sharing)
     - [Remotely Inspecting Images](#remotely-inspecting-images)
     - [Pulling Images](#pulling-images)
-    - [Moving Between Container Storage (Podman \& Docker)](#moving-between-container-storage-podman--docker)
     - [Moving Between Container Registries](#moving-between-container-registries)
     - [Conclusions](#conclusions-1)
-  - [CRIU: Checkpointing and Restoring](#criu-checkpointing-and-restoring)
-    - [Conclusions](#conclusions-2)
-  - [Udica: Custom SELinux Policies](#udica-custom-selinux-policies)
-    - [Conclusions](#conclusions-3)
-  - [OSCAP Podman: Trust but Verify](#oscap-podman-trust-but-verify)
-    - [Conclusions](#conclusions-4)
   - [Next Up](#next-up)
 
 
@@ -376,11 +369,11 @@ Verify that there is nothing in the directory:
 ls -alh $WORKING_MOUNT
 ```
 
-Now, lets install some basic tools:
+Now, lets install some basic tools (don't worry about the entitlement errors):
 
 ```
-yum install --installroot $WORKING_MOUNT bash coreutils --releasever 8 --setopt install_weak_deps=false -y
-yum clean all -y --installroot $WORKING_MOUNT --releasever 8
+dnf install --installroot $WORKING_MOUNT bash coreutils --releasever 8 --setopt install_weak_deps=false -y
+dnf clean all -y --installroot $WORKING_MOUNT --releasever 8
 ```
 
 Verify that some files have been added:
@@ -411,7 +404,7 @@ Clean things up for our next experiment:
 buildah delete -a
 ```
 
-We have just created a container image layer from scratch without ever installing RPM or YUM. This same pattern can be used to solve countless problems. Makefiles often have the option of specifying the output directory, etc. This can be used to build a C program without ever installing the C toolchain in a container image layer. This is best for production security where we don't want the build tools laying around in the container.
+We have just created a container image layer from scratch without ever installing RPM or DNF. This same pattern can be used to solve countless problems. Makefiles often have the option of specifying the output directory, etc. This can be used to build a C program without ever installing the C toolchain in a container image layer. This is best for production security where we don't want the build tools laying around in the container.
 
 ### External Build Time Mounts
 
@@ -504,7 +497,7 @@ ls -alh ~/fedora-skopeo
 
 The Config and Image Layers are there, but remember we need to rely on a [Graph Driver](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.kvykojph407z) in a [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) to map them into a RootFS.
 
-### Moving Between Container Storage (Podman & Docker)
+<!-- ### Moving Between Container Storage (Podman & Docker)
 
 First, let's do a little hack to install Docker CE side by side with Podman on RHEL 8. Don't do this on a production system as this will overwrite the version of runc provided by Red Hat:
 
@@ -531,7 +524,7 @@ Verify that the repository is now in the Docker CE cache:
 docker images | grep registry.fedoraproject.org
 ```
 
-This can be useful when testing and getting comfortable with other OCI complaint tools like Podman, Buildah, and Skopeo. Sometimes, you aren't quite ready to let go of what you know so having them side by side can be useful. Remember though, this isn't supported because it replaces the runc provided by Red Hat.
+This can be useful when testing and getting comfortable with other OCI complaint tools like Podman, Buildah, and Skopeo. Sometimes, you aren't quite ready to let go of what you know so having them side by side can be useful. Remember though, this isn't supported because it replaces the runc provided by Red Hat. -->
 
 ### Moving Between Container Registries
 
@@ -543,17 +536,18 @@ skopeo copy docker://registry.fedoraproject.org/fedora docker://quay.io/fatherli
 
 This command just synchronized the fedora repository from the Fedora Registry to Quay.io without ever caching it in the local container storage. Very cool right?
 
-Finally, exit the ''rhel'' user because we need root for the next lab:
+<!-- Finally, exit the ''rhel'' user because we need root for the next lab:
 
 ```
 exit
-```
+``` -->
 
 ### Conclusions
 
 You have a new tool in your tool belt for sharing and moving containers. Hopefully, you find other uses for Skopeo.
 
-## CRIU: Checkpointing and Restoring
+<!-- Need root -->
+<!-- ## CRIU: Checkpointing and Restoring
 
 With some help from a program called CRIU, Podman can checkpoint and restore containers on the same host. This can be useful with workloads that have a long startup period or require a long time to warm up caches. For example, large memcached servers, database, or even Java workloads can take several minutes or even hours to reach maximum throughput performance. This is often referred to as cache warming.
 
@@ -639,6 +633,7 @@ podman kill -a
 
 Checkpointing and restoring containers is easy with CRIU and Podman. As part of the container-tools application streams, specific versions of Podman and CRIU are tested and verified to work together (not all versions of Podman and CRIU are guaranteed to work together). Now, let's move on to some more tools.
 
+
 ## Udica: Custom SELinux Policies
 
 The default Containers SELinux policy does a really good job Podman in RHEL 8. Most containers "just work" but like any security tool, every now and then we need to make some customizations. Sometimes, especially as we expand the types of workloads that we run in containers, we bump into places where SELinux blocks us. Udica allows an administrator to customize the SELinux policy specifically for a workload for without being an SELinux expert.
@@ -722,6 +717,7 @@ Check it out here: [UBI 8.0-126 image](https://catalog.redhat.com/software/conta
 Now, let's take a more detailed look, using the oscap-podman command:
 
 ```
+sudo dnf install -y openscap-utils
 oscap-podman registry.access.redhat.com/ubi8/ubi:8.0-126 oval eval --report ./assets/html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
 ```
 
@@ -738,6 +734,7 @@ Look at the new report from thr *OSCAP Report latest* Tab.
 ### Conclusions
 
 In general you should almost never see any unapplied patches in this latest build of UBI. If you do, it's like a small window between the time that Red Hat Product Security has issued a CVE, and our product team has rebuilt and published the UBI image. The oscap-podman command allows you to verify this and is useful in "trust but verify" operations like CI/CD system tests. For more information and deeper dive on OSCAP-Podman, check out this great video by Brian Smith: [Scanning Containers for Vulnerabilities on RHEL 8.2 With OpenSCAP and Podman](https://www.youtube.com/watch?v=nQmIcK1vvYc)
+-->
 
 ## Next Up
 

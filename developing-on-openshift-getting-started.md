@@ -5,40 +5,35 @@
   - [Deploying with an Image](#deploying-with-an-image)
     - [Working with the Command Line Interface (CLI)](#working-with-the-command-line-interface-cli)
     - [Logging in with the CLI](#logging-in-with-the-cli)
-    - [Congratulations!](#congratulations)
-    - [Logging in with the web console](#logging-in-with-the-web-console)
-    - [Understanding projects in OpenShift](#understanding-projects-in-openshift)
-    - [Creating a project](#creating-a-project)
-    - [Congratulations!](#congratulations-1)
-    - [Scaling up the application](#scaling-up-the-application)
-    - [Verifying the number of replicas](#verifying-the-number-of-replicas)
-    - [Understanding application "self healing"](#understanding-application-self-healing)
-    - [Scaling down an application](#scaling-down-an-application)
-    - [Congratulations!](#congratulations-2)
-    - [Viewing a route's URL](#viewing-a-routes-url)
+      - [Congratulations!](#congratulations)
+    - [Logging in with the Web Console](#logging-in-with-the-web-console)
+    - [Understanding Projects in OpenShift](#understanding-projects-in-openshift)
+    - [Creating a Project](#creating-a-project)
+      - [Congratulations!](#congratulations-1)
+    - [Scaling Up the Application](#scaling-up-the-application)
+    - [Verifying the Number of Replicas](#verifying-the-number-of-replicas)
+    - [Understanding Application "Self-Healing"](#understanding-application-self-healing)
+    - [Scaling Down an Application](#scaling-down-an-application)
+      - [Congratulations!](#congratulations-2)
+    - [Viewing a Route's URL](#viewing-a-routes-url)
     - [Accessing a Route's URL](#accessing-a-routes-url)
-    - [Congratulations!](#congratulations-3)
-  - [Deploying with a Helm Chart](#deploying-with-a-helm-chart)
-    - [Helm Command Line Interface (CLI)](#helm-command-line-interface-cli)
+      - [Congratulations!](#congratulations-3)
+  - [Deploying with a Helm Chart (Optional)](#deploying-with-a-helm-chart-optional)
     - [Creating a New Project](#creating-a-new-project)
+    - [Add a Helm Repo](#add-a-helm-repo)
     - [Exercise: Explore CLI](#exercise-explore-cli)
     - [Deploy a Helm Chart](#deploy-a-helm-chart)
     - [Verify the deployment from OpenShift Console](#verify-the-deployment-from-openshift-console)
     - [Uninstall and clean](#uninstall-and-clean)
-  - [Create Your First Helm Chart](#create-your-first-helm-chart)
-  - [Creating a new Helm Chart](#creating-a-new-helm-chart)
-  - [Managing Helm Revisions in OpenShift](#managing-helm-revisions-in-openshift)
-    - [Upgrade revisions](#upgrade-revisions)
-    - [Add OpenShift Route as Template](#add-openshift-route-as-template)
-    - [Upgrade and Rollback](#upgrade-and-rollback)
-    - [Uninstall](#uninstall)
   - [What's Next?](#whats-next)
 
-Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructor, along with these instructions, as we journey from simple Linux containers to advanced container orchestration using Red Hat OpenShift.
+Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructors, along with these instructions, as we journey through advanced container orchestration using Red Hat OpenShift.
+
+If you already have `oc` installed on your machine, feel free to use your own terminal for the CLI portion of this work, otherwise you may use OpenShift Dev Spaces.
 
 Let's begin by logging into the environment provided by your instructors and going to OpenShift Dev Spaces.
 
-![Web Console Login](./assets/developing-on-openshift-getting-started/assets/web-console-login.png)
+![Web Console Login](./assets/images/sign-in.png)
 
 Get your OpenShift User ID and Password from the registration page:
 ![OpenShift Credentials](./assets/developing-on-openshift-getting-started/assets/openshift-user-password.png)
@@ -150,7 +145,7 @@ You log into OpenShift from the command line using the `oc login` command.
 
 ----
 
-`Step 1:` Run the following command in the terminal window to the left:
+`Step 1:` Run the following command in the terminal:
 
 ```
 oc login -u <lab user id> -p <lab password> LAB_API_ENDPOINT --insecure-skip-tls-verify=true
@@ -159,11 +154,17 @@ oc login -u <lab user id> -p <lab password> LAB_API_ENDPOINT --insecure-skip-tls
 Upon successful login, you'll get results similar to the following:
 
 ```
-Login successful.
+Logged into "https://api.cluster-c8wjq.sandbox2325.opentlc.com:6443" as "user1" using the token provided.
 
-You have access to 86 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to the following projects and can switch between them with 'oc project <projectname>':
 
-Using project "admin-devspaces".
+  * argocd-user1
+    user1-devspaces
+    vote-app-ci-user1
+    vote-app-dev-user1
+    vote-app-prod-user1
+
+Using project "argocd-user1".
 ```
 
 Running the Linux [`whoami`](https://en.wikipedia.org/wiki/Whoami) command reports the current user and implicitly confirms that the login is successful.
@@ -179,10 +180,10 @@ oc whoami
 You'll get the following results:
 
 ```
-admin
+user1
 ```
 
-### Congratulations!
+#### Congratulations!
 
  You've logged in to OpenShift using the `oc` command line tool.
 
@@ -191,22 +192,23 @@ admin
 
 This topic focuses on learning how to log into the Red Hat OpenShift web console and then create an application once logged in.
 
-### Logging in with the web console
+### Logging in with the Web Console
 
-Your first task is to log into OpenShift from the web console.
+Your first task is to log into OpenShift from the web console. (Skip to Step 2 if you are already logged in from using OpenShift Dev Spaces.)
 
 ----
 
 `Step 1:`
-Click the **Web Console** tab from the horizontal menu bar over the terminal to the left to open the OpenShift web console.
+Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
 
 You will be presented with the OpenShift login screen. Use the following credentials to log in.
+
 * **Username:** `<lab user id>`
 * **Password:** `<lab password>`
 
 Log into the OpenShift web console, as shown in the figure below.
 
-![Web Console Login](./assets/developing-on-openshift-getting-started/assets/web-console-login.png)
+![Web Console Login](./assets/images/sign-in.png)
 
 |NOTE:|
 |----|
@@ -228,39 +230,37 @@ You need to change the perspective from **Administrator** to **Developer**.
 
 Now that you're in the **Developer** perspective, let's take a moment to discuss the concept of a **project** in OpenShift.
 
-### Understanding projects in OpenShift
+### Understanding Projects in OpenShift
 
-OpenShift is often referred to as a container application platform in that it's a platform designed for the development and deployment of applications in [Linux containers](https://developers.redhat.com/topics/containers).
+OpenShift is often referred to as a container application platform because it's a platform designed for the development and deployment of applications in [Linux containers](https://developers.redhat.com/topics/containers).
 
 OpenShift has an organizational unit named **project**. You use a **project** to group resources in your application. The reason for organizing your application in a **project** is to enable controlled access and quotas for developers or teams.
 
 You can think of a **project** as a visualization of the Kubernetes namespace based on the developer access controls.
 
-Now, let's create a project.
+Now, let's create a new project.
 
-### Creating a project
+### Creating a Project
 
 In this section you will create a project using the OpenShift web console.
 
 ----
 
-`Step 3:` Click the **Web Console** tab from the horizontal menu bar over the terminal to the left to open the OpenShift Web Console.
-
-Click the button labeled **+Add** on the menu bar on the left side of the Web Console. The **Add** web page appears.
+`Step 3:` Click the button labeled **+Add** on the menu bar on the left side of the Web Console. The **Add** web page appears.
 
 ----
 
-`Step 4:` Click the link with the text **Create a project** as shown in the figure below:
+`Step 4:` Click the link with the text **create a Project** as shown in the figure below:
 
 ![Create project](./assets/developing-on-openshift-getting-started/assets/add_project.png)
 
-You'll be presented with the **Add Project** dialog for declaring the project.
+You'll be presented with the **Create Project** dialog for declaring the project.
 
 ----
 
-`Step 5:` Name the project `myproject` as shown in the figure below:
+`Step 5:` Name the project `myproject-<YOUR_USER>` as shown in the figure below:
 
-![Name project](./assets/developing-on-openshift-getting-started/assets/config-project.png)
+![Name project](./assets/images/create-project.png)
 
 ----
 
@@ -301,7 +301,7 @@ You will spend most of your time in the remainder of this tutorial in that persp
 
 You are now ready to scale the application up and down.
 
-### Congratulations!
+#### Congratulations!
 
  You deployed an application from a container image using the OpenShift web console.
 
@@ -309,9 +309,9 @@ You are now ready to scale the application up and down.
 
 In this step, you will learn how to scale your application up by creating multiple replicas of the pod that represents the application in the cluster. Red Hat OpenShift will make it look like all of the replicas are a single application. But, behind the scenes, OpenShift routes traffic among the replicas automatically.
 
-The benefit of replicating a pod is that it increases the amount of Internet traffic the application can accommodate. The result is better overall performance.
+The benefit of replicating a pod is that it increases the amount of internet traffic the application can accommodate. The result is better overall performance.
 
-### Scaling up the application
+### Scaling Up the Application
 
 You will scale up the application up to 2 replicas.
 
@@ -331,7 +331,7 @@ The figure below illustrates selecting the **Details** and increasing the number
 
 You are now running two replicas of the application.
 
-### Verifying the number of replicas
+### Verifying the Number of Replicas
 
 ----
 
@@ -341,7 +341,7 @@ You are now running two replicas of the application.
 
 You can see that we now have 2 replicas. Now, let's take a look at OpenShift's self-healing feature. Self Healing ensures that the number of pods you declare for your application is always running.
 
-### Understanding application "self healing"
+### Understanding Application "Self-Healing"
 
 Under the OpenShift application **Deployments** are constantly monitored to see that the desired number of pods are actually running. Therefore, if the actual state ever deviates from the desired state--for example, if a pod goes down--OpenShift will fix the situation.
 
@@ -365,7 +365,7 @@ After deleting the pod, you will be taken to a page listing pods. Notice that ev
 
 A replacement pod was created because OpenShift will always make sure that when a pod dies, it creates a new pod to fill its place.
 
-### Scaling down an application
+### Scaling Down an Application
 
 Before we continue, go ahead and scale your application down to a single instance.
 
@@ -381,13 +381,15 @@ Before we continue, go ahead and scale your application down to a single instanc
 
 ![Reset pod count](./assets/developing-on-openshift-getting-started/assets/reset-pod-count.jpg)
 
-### Congratulations!
+#### Congratulations!
 
  You've learned how to use the OpenShift web console to scale the number of replica pods for an application up and down.
 
 ----
 
-In this step you will explore **routes**.
+### Viewing a Route's URL
+
+In this next step you will explore **routes**.
 
 In Red Hat OpenShift, the **service** resource provides the internal abstraction that binds access to an application to its logic, which is represented in an application's pods. Also, a **service** provides load-balancing capabilities within an OpenShift environment.
 
@@ -395,10 +397,7 @@ The binding of a **service** to an application's pods is internal to an OpenShif
 
 The formal name for the resource which represents the routing layer is called a **route**.
 
-As mentioned earlier in the tutorial, When you create an application from a **container image**, OpenShift creates a **route** for the application automatically. Let's take a look at where the **route** is published. Then, let's access the application's website from a browser using its route URL.
-
-### Viewing a route's URL
-
+As mentioned earlier in the tutorial, when you create an application from a **container image**, OpenShift creates a **route** for the application automatically. Let's take a look at where the **route** is published. Then, let's access the application's website from a browser using its route URL.
 
 `Step 1:` To view the **route** for your application, make sure you are in the **Developer** perspective by selecting **Developer** from the dropdown list on the left side menu bar. Then from within **Topology** view, click the application circle as shown in the figure below.
 
@@ -438,42 +437,51 @@ Clicking the icon opens the application's web page in a browser as shown in th f
 
 ----
 
-### Congratulations!
+#### Congratulations!
 
  You have now located the application's **route** URL in the OpenShift web console. Also, you've learned how to open the application in a web page from the **Resource** tab in the application detail, and also directly from the application's circular graphic in the **Topology** view.
 
-This is the final step in this track.
+This is the final step in **Deploying with an Image**.
 
-
-## Deploying with a Helm Chart
+## Deploying with a Helm Chart (Optional)
 
 At the end of this section you will be able to:
-- Use `helm` CLI
-- Install `helm repository`
-- Search, install and uninstall `Helm Charts`
-- Review Helm Charts from `OpenShift Console`
+- Install a Helm repository from the OpenShift Console
+- Search, install and uninstall Helm Charts
+- Review Helm Charts from OpenShift Console
 
-### Helm Command Line Interface (CLI)
+<!-- ### Helm Command Line Interface (CLI)
 
-In this scenario you will find the Helm CLI already installed for you, which can be  also retrieved from OpenShift Console, top right corner, click on ? -> Command Line Tools.
+In this scenario you will find the Helm CLI already installed for you, which can be  retrieved from the OpenShift Console (look for the >_ button in the OpenShift header.)
 
-The CLI is the entry point for any interaction with Helm 3 subsystem. In addition to that, OpenShift Developer Catalog, which is the central hub for all developer content, has support for Helm Charts in addition to Operator-backed services, Templates, etc.
+The CLI is the entry point for any interaction with the Helm 3 subsystem. In addition to that, OpenShift Developer Catalog, which is the central hub for all developer content, has support for Helm Charts in addition to Operator-backed services, Templates, etc.
 
 When a user instructs the Helm CLI to install a Helm Chart, the information about the Helm Chart is fetched from the repository, rendered on the client and then applied to Kubernetes while a record of this installation is created within the namespace (which is known as a Release).
 
-![Helm on OpenShift](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/developing-on-openshift/helm/helm-diagram.png)
+![Helm on OpenShift](https://raw.githubusercontent.com/openshift-instruqt/instruqt/master/assets/developing-on-openshift/helm/helm-diagram.png) -->
 
 
 ### Creating a New Project
 
-Let's create a new OpenShift Project to have a namespace for our helm charts to work with.
+Let's create a new OpenShift Project to have a namespace for our Helm Charts to work with.
 
 ```
-oc new-project helm
+oc new-project helm-<YOUR_USER>
 ```
+
+### Add a Helm Repo
+As discussed in the previous step, Helm Charts are available through repositories, and those can be pre-installed or installable by the user.
+
+You can search for Helm Charts available in any public repositories through [Helm Hub](https://hub.helm.sh/).
+
+For instance, searching Helm Charts for [NGINX](https://nginx.com) will give a list of available charts from multiple repositories. If we want to install it, we need to have such repositories configured.
+
+By default the list of available repositories is empty. You can add a new one with the CLI or through the OpenShift Console. Let's add the Bitnami repository through the OpenShift Console now.
+
+![Helm on OpenShift Console](./assets/images/helm-1.png)
 
 ### Exercise: Explore CLI
-Let's get started by using `helm` getting CLI version :
+Let's get started by using `helm` getting CLI version:
 
 ```
 helm version
@@ -587,7 +595,7 @@ Delete previously created `route`:
 oc delete route my-nginx
 ```
 
-## Create Your First Helm Chart
+<!-- ## Create Your First Helm Chart
 
 At the end of this section you will be able to:
 - Create your own `Helm Chart`
@@ -800,7 +808,7 @@ Uninstall will clean everything now, there's no further need to delete manually 
 
 ```
 helm uninstall my-chart
-```
+``` -->
 
 ## What's Next?
 

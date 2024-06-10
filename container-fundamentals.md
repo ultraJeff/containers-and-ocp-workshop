@@ -32,7 +32,7 @@ Welcome to this workshop on containers and OpenShift! Today, we will use a hoste
         - [Red Hat Container Catalog](#red-hat-container-catalog)
       - [Summary](#summary)
     - [Analyzing Storage and Graph Drivers](#analyzing-storage-and-graph-drivers)
-  - [Run Container Images with Hosts](#run-container-images-with-hosts)
+  - [Run Container Images with Hosts (Optional)](#run-container-images-with-hosts-optional)
     - [Container Engines \& The Linux Kernel](#container-engines--the-linux-kernel)
     - [SELinux \& sVirt: Dynamically generated contexts to protect your containers (Optional)](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers-optional)
     - [Cgroups: Dynamically created with container instantiation](#cgroups-dynamically-created-with-container-instantiation)
@@ -466,7 +466,7 @@ To analyze the quality, we are going to leverage existing tools - which is anoth
 ##### CentOS
 
 ```bash
-Podman run -it docker.io/centos:7.0.1406 yum updateinfo
+podman run -it docker.io/centos:7.0.1406 yum updateinfo
 ```
 
 CentOS does not provide Errata for package updates, so this command will not show any information. This makes it difficult to map CVEs to RPM packages. This, in turn, makes it difficult to update the packages which are affected by a CVE. Finally, this lack of information makes it difficult to score a container image for quality. A basic workaround is to just update everything, but even then, you are not 100% sure which CVEs you patched.
@@ -474,7 +474,7 @@ CentOS does not provide Errata for package updates, so this command will not sho
 ##### Fedora
 
 ```bash
-Podman run -it registry.fedoraproject.org/fedora dnf updateinfo
+podman run -it registry.fedoraproject.org/fedora dnf updateinfo
 ```
 
 Fedora provides decent meta data about package updates, but does not map them to CVEs either. Results will vary on any given day, but the output will often look something like this:
@@ -492,7 +492,7 @@ Updates Information Summary: available
 ##### Ubuntu
 
 ```bash
-Podman run -it docker.io/ubuntu:trusty-20170330 /bin/bash -c "apt-get update && apt list --upgradable"
+podman run -it docker.io/ubuntu:trusty-20170330 /bin/bash -c "apt-get update && apt list --upgradable"
 ```
 
 Ubuntu provides information at a similar quality to Fedora, but again does not map updates to CVEs easily. The results for this specific image should always be the same because we are purposefully pulling an old tag for demonstration purposes.
@@ -504,7 +504,7 @@ podman run -it registry.access.redhat.com/ubi7/ubi:7.6-73 yum updateinfo securit
 ```
 -->
 ```bash
-Podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
+podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
 ```
 
 Regrettably, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output would look more like the following if we did:
@@ -589,7 +589,7 @@ This has implications on how you move container images from one registry to anot
 
 For now, you understand enough about registry servers, repositories, and how images are cached locally. Let's move on.
 
-## Run Container Images with Hosts
+## Run Container Images with Hosts (Optional)
 
 ### Container Engines & The Linux Kernel
 
@@ -770,7 +770,7 @@ Next, let's gain a basic understanding of SELinux/sVirt. Run the following comma
 
 ```
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
-Podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
+podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
 ps -efZ | grep container_t | grep sleep
 ```
@@ -825,7 +825,7 @@ To demonstrate, run two separate containerized sleep processes:
 
 ```bash
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
-Podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
+podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
 for i in $(Podman ps | grep sleep | awk '{print $1}' | grep [0-9]); do find /sys/fs/cgroup/ | grep $i; done
 ```
