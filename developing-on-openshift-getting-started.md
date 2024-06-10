@@ -35,6 +35,9 @@ Let's begin by logging into the environment provided by your instructors and goi
 
 ![Web Console Login](./assets/images/sign-in.png)
 
+Get your OpenShift User ID and Password from the registration page:
+![OpenShift Credentials](./assets/developing-on-openshift-getting-started/assets/openshift-user-password.png)
+
 |NOTE:|
 |----|
 |You might see the following warning notification due to using an untrusted security certificate.
@@ -122,6 +125,7 @@ Take a moment to note that we could fire up 50 copies of this same application i
 
 ## Deploying with an Image
 
+<!--
 ### Working with the Command Line Interface (CLI)
 
 You can access the Red Hat OpenShift CLI with the command `oc`. Using the `oc` command lets you work with the entire OpenShift cluster and deploy new applications.
@@ -144,7 +148,7 @@ You log into OpenShift from the command line using the `oc login` command.
 `Step 1:` Run the following command in the terminal:
 
 ```
-oc login -u YOUR_USER -p LAB_PASSWORD LAB_API_ENDPOINT --insecure-skip-tls-verify=true
+oc login -u <lab user id> -p <lab password> LAB_API_ENDPOINT --insecure-skip-tls-verify=true
 ```
 
 Upon successful login, you'll get results similar to the following:
@@ -184,6 +188,7 @@ user1
  You've logged in to OpenShift using the `oc` command line tool.
 
 ----
+-->
 
 This topic focuses on learning how to log into the Red Hat OpenShift web console and then create an application once logged in.
 
@@ -197,8 +202,9 @@ Your first task is to log into OpenShift from the web console. (Skip to Step 2 i
 Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
 
 You will be presented with the OpenShift login screen. Use the following credentials to log in.
-* **Username:** `<YOUR_USER>`
-* **Password:** `<LAB_PASSWORD>`
+
+* **Username:** `<lab user id>`
+* **Password:** `<lab password>`
 
 Log into the OpenShift web console, as shown in the figure below.
 
