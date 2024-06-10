@@ -153,7 +153,7 @@ You log into OpenShift from the command line using the `oc login` command.
 `Step 1:` Run the following command in the terminal window to the left:
 
 ```
-oc login -u <lab user id> -p <lab password? LAB_API_ENDPOINT --insecure-skip-tls-verify=true
+oc login -u <lab user id> -p <lab password> LAB_API_ENDPOINT --insecure-skip-tls-verify=true
 ```
 
 Upon successful login, you'll get results similar to the following:
