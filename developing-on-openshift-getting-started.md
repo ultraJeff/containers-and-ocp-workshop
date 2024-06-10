@@ -3,28 +3,23 @@
 - [Getting Started Developing on OpenShift](#getting-started-developing-on-openshift)
   - [Container Orchestration Primer](#container-orchestration-primer)
   - [Deploying with an Image](#deploying-with-an-image)
-    - [Working with the Command Line Interface (CLI)](#working-with-the-command-line-interface-cli)
-    - [Logging in with the CLI](#logging-in-with-the-cli)
-      - [Congratulations!](#congratulations)
     - [Logging in with the Web Console](#logging-in-with-the-web-console)
     - [Understanding Projects in OpenShift](#understanding-projects-in-openshift)
     - [Creating a Project](#creating-a-project)
-      - [Congratulations!](#congratulations-1)
+      - [Congratulations!](#congratulations)
     - [Scaling Up the Application](#scaling-up-the-application)
     - [Verifying the Number of Replicas](#verifying-the-number-of-replicas)
     - [Understanding Application "Self-Healing"](#understanding-application-self-healing)
     - [Scaling Down an Application](#scaling-down-an-application)
-      - [Congratulations!](#congratulations-2)
+      - [Congratulations!](#congratulations-1)
     - [Viewing a Route's URL](#viewing-a-routes-url)
     - [Accessing a Route's URL](#accessing-a-routes-url)
-      - [Congratulations!](#congratulations-3)
+      - [Congratulations!](#congratulations-2)
   - [Deploying with a Helm Chart (Optional)](#deploying-with-a-helm-chart-optional)
     - [Creating a New Project](#creating-a-new-project)
     - [Add a Helm Repo](#add-a-helm-repo)
-    - [Exercise: Explore CLI](#exercise-explore-cli)
     - [Deploy a Helm Chart](#deploy-a-helm-chart)
     - [Verify the deployment from OpenShift Console](#verify-the-deployment-from-openshift-console)
-    - [Uninstall and clean](#uninstall-and-clean)
   - [What's Next?](#whats-next)
 
 Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructors, along with these instructions, as we journey through advanced container orchestration using Red Hat OpenShift.
@@ -479,8 +474,14 @@ For instance, searching Helm Charts for [NGINX](https://nginx.com) will give a l
 By default the list of available repositories is empty. You can add a new one with the CLI or through the OpenShift Console. Let's add the Bitnami repository through the OpenShift Console now.
 
 ![Helm on OpenShift Console](./assets/images/helm-1.png)
+![Helm on OpenShift Console](./assets/images/helm-2.png)
+![Helm on OpenShift Console](./assets/images/helm-3.png)
+![Helm on OpenShift Console](./assets/images/helm-4.png)
 
-### Exercise: Explore CLI
+
+
+
+<!-- ### Exercise: Explore CLI
 Let's get started by using `helm` getting CLI version:
 
 ```
@@ -517,15 +518,21 @@ You can search for Helm Charts also inside repos, like in the one you just insta
 
 ```
 helm search repo bitnami/nginx
-```
+``` -->
 
 ### Deploy a Helm Chart
 
-You can use `helm install` command to deploy your charts and start managing revisions.
+<!-- You can use `helm install` command to deploy your charts and start managing revisions. -->
 
-To install [NGINX Chart](https://hub.helm.sh/charts/bitnami/nginx):
+To install the [NGINX Chart](https://hub.helm.sh/charts/bitnami/nginx), search for "nginx" in the search box on this page.
 
-```
+![Helm on OpenShift Console](./assets/images/helm-5-install-nginx.png)
+
+Click on the nginx menu item and click Create
+
+![Helm on OpenShift Console](./assets/images/helm-6-install-nginx-2.png)
+
+<!-- ```
 helm install my-nginx bitnami/nginx --set service.type=ClusterIP
 ```
 
@@ -535,7 +542,7 @@ Check your Helm releases:
 
 ```
 helm ls
-```
+``` -->
 
 Verify all the pods are in Running state and Ready:
 
@@ -579,7 +586,7 @@ Explore all `Resources` that are associated with a particular Helm `Release`, cl
 
 <img src="https://katacoda.com/embed/openshift/courses/assets/developing-on-openshift/helm/nginx-helm-resources-view.png" width="800" />
 
-### Uninstall and clean
+<!-- ### Uninstall and clean
 
 Come back to Terminal clicking on Terminal tab.
 
@@ -593,7 +600,6 @@ Delete previously created `route`:
 
 ```
 oc delete route my-nginx
-```
 
 <!-- ## Create Your First Helm Chart
 
