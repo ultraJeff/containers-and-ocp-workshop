@@ -43,9 +43,9 @@ Now click the menu button in the OpenShift console header and select **OpenShift
 
 ![Dev Spaces Menu Item](./assets/images/ocp-to-dev-spaces.png)
 
-From here, create a new blank workspace and open the terminal
+From here, select the vote-ui workspace. This project will not be used during today's workshop, but provides us with a workspace.
 
-![Dev Spaces Blank Workspace](./assets/images/empty-workspace.png)
+![Dev Spaces Vote UI Workspace](./assets/images/vote-ui-dev-spaces.png)
 
 This will take a minute or two to load since this is the first time you are opening this workspace
 
@@ -473,13 +473,23 @@ For instance, searching Helm Charts for [NGINX](https://nginx.com) will give a l
 
 By default the list of available repositories is empty. You can add a new one with the CLI or through the OpenShift Console. Let's add the Bitnami repository through the OpenShift Console now.
 
+Start by going to "Helm" in the left hand menu of the OpenShift Console and then choosing the "Repositories" tab. Click the blue "Create" button in the top right corner of this page and choose "Respository" from the dropdown.
+
 ![Helm on OpenShift Console](./assets/images/helm-1.png)
-![Helm on OpenShift Console](./assets/images/helm-2.png)
+
+Fill out the new Project Helm Chart Repository form with
+* **Name:** bitnami
+* **URL:** https://charts.bitnami.com/bitnami
+
+![Helm on OpenShift Console](./assets/images/helm-2-create-bitnami.png)
+
+And now you will be dropped back on the **+Add** page. From here, find "Helm Chart" and click here.
+
 ![Helm on OpenShift Console](./assets/images/helm-3.png)
+
+Now check the Bitnami box to discover all of the Bitnami charts provided through this new Helm respository!
+
 ![Helm on OpenShift Console](./assets/images/helm-4.png)
-
-
-
 
 <!-- ### Exercise: Explore CLI
 Let's get started by using `helm` getting CLI version:
@@ -526,9 +536,13 @@ helm search repo bitnami/nginx
 
 To install the [NGINX Chart](https://hub.helm.sh/charts/bitnami/nginx), search for "nginx" in the search box on this page.
 
+![Helm on OpenShift Console](./assets/images/helm-search-nginx.png)
+
+After clicking on Nginx, click "Install Helm Chart"
+
 ![Helm on OpenShift Console](./assets/images/helm-5-install-nginx.png)
 
-Click on the nginx menu item and click Create
+Now take all of the defaults and click "Install"
 
 ![Helm on OpenShift Console](./assets/images/helm-6-install-nginx-2.png)
 
@@ -550,10 +564,10 @@ Verify all the pods are in Running state and Ready:
 oc get pods
 ```
 
-Now expose `my-nginx` service to access it via OpenShift `Route`:
+Now expose `nginx` service to access it via OpenShift `Route`:
 
 ```
-oc expose svc/my-nginx
+oc expose svc/nginx
 ```
 
 Verify that route has been created:
