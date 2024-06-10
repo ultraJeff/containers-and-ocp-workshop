@@ -37,7 +37,7 @@ Welcome to this workshop on containers and OpenShift! Today, we will use a hoste
     - [SELinux \& sVirt: Dynamically generated contexts to protect your containers (Optional)](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers-optional)
     - [Cgroups: Dynamically created with container instantiation](#cgroups-dynamically-created-with-container-instantiation)
     - [SECCOMP: Limiting how a containerized process can interact with the kernel](#seccomp-limiting-how-a-containerized-process-can-interact-with-the-kernel)
-  - [Architect a Better Environment](#architect-a-better-environment)
+  - [Architect a Better Environment (Optional)](#architect-a-better-environment-optional)
     - [Overview of The OCI Specifications](#overview-of-the-oci-specifications)
     - [The OCI Image Specification](#the-oci-image-specification)
     - [The OCI Runtime Specification](#the-oci-runtime-specification)
@@ -856,7 +856,7 @@ podman run -it --security-opt seccomp=~/chmod.json registry.access.redhat.com/ub
 
 Notice how the chmod system call is blocked.
 
-## Architect a Better Environment
+## Architect a Better Environment (Optional)
 
 ### Overview of The OCI Specifications
 
