@@ -267,6 +267,8 @@ Alright, let's walk through some common scenarios with Buildah.
 Just like Podman, Buildah can execute in rootless mode, but since you have tools on the container host interacting files in the container image, you need to make Buildah think it's running as root. Buildah comes with a cool sub-command called unshare which does just this. It puts our shell into a user namespace just like when you have a root shell in a container. The difference is, this shell has access to tools installed on the container host, instead of in the container image. Before we complete the rest of this lab, execute the "buildah unshare" command. Think of this as making yourself root, without actually making yourself root:
 
 ```
+sudo dnf install buildah
+
 buildah unshare
 ```
 
