@@ -827,7 +827,7 @@ To demonstrate, run two separate containerized sleep processes:
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 podman run -dt registry.access.redhat.com/ubi7/ubi sleep 10
 sleep 3
-for i in $(Podman ps | grep sleep | awk '{print $1}' | grep [0-9]); do find /sys/fs/cgroup/ | grep $i; done
+for i in $(podman ps | grep sleep | awk '{print $1}' | grep [0-9]); do find /sys/fs/cgroup/ | grep $i; done
 ```
 
 Notice how each containerized process is put into its own cgroup by the container engine. This is quite convenient, similar to sVirt.
@@ -945,7 +945,7 @@ podman init fedora
 The "podman init" command generates a config.json and we can take a look at it in /home/student/.local/share/containers/storage/overlay-containers:
 
 ```
-cat $(find /home/student/.local/share/containers/storage/overlay-containers/ | grep  $(Podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
+cat $(find /home/student/.local/share/containers/storage/overlay-containers/ | grep  $(podman ps --no-trunc -q | tail -n 1)/userdata/config.json) | jq
 ```
 
 Take a minute to browse through the json output. See if you can spot directives which come from the container image, the container engine, and the user.
