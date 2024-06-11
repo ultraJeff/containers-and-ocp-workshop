@@ -467,6 +467,8 @@ In this step, we are going to do a couple of simple exercises with Skopeo to giv
 First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image remotely before pulling it down to the local cache. This allows us to inspect the metadata of the image and see if we really want to use it, without synchronizing it to the local image cache:
 
 ```
+sudo dnf install skopeo
+
 skopeo inspect docker://registry.fedoraproject.org/fedora
 ```
 
