@@ -24,7 +24,10 @@
 
 Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructors, along with these instructions, as we journey through advanced container orchestration using Red Hat OpenShift.
 
-If you already have `oc` installed on your machine, feel free to use your own terminal for the CLI portion of this work, otherwise you may use OpenShift Dev Spaces.
+If you already have `oc` installed on your machine, feel free to use your own terminal for the CLI portion of this work
+
+<!--
+, otherwise you may use OpenShift Dev Spaces.
 
 Let's begin by logging into the environment provided by your instructors and going to OpenShift Dev Spaces.
 
@@ -58,6 +61,11 @@ Once your workspace loads, choose *Trust the Authors*
 And finally, open the terminal by clicking the hamburger menu icon on the top left
 
 ![Dev Spaces Open the Terminal](./assets/images/terminal-2.png)
+
+-->
+## Log into Openshift
+Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `login command` into the bastion.
+
 
 Now, you are ready to begin this workshop module!
 
