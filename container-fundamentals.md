@@ -701,7 +701,7 @@ See the test file there. You will see this file in our container later when we s
 At this point the container image has been cached locally and mounted, but we don't actually have a spec file for runc yet. Creating a spec file from hand is quite tedious because they are made up of complex JSON with a lot of different options (governed by the OCI runtime spec). Luckily for us, the container engine will create one for us. This exact same spec file can be used by any OCI compliant runtime can consume it (runc, crun, katacontainers, gvisor, etc). Let's run some experiments to show when it's created. First let's inspect the place where it should be:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json | jq .
 ```
 
 The above command errors out because the container engine hasn't created the config.json file yet. We will initiate the creation of this file by using Podman combined with a specially constructed container image:
@@ -713,7 +713,7 @@ podman start on-off-container
 Now, the config.json file has been created. Inspect it for a while. Notice that there are options in there that are strikingly similar to the command line options of Podman. The spec file really highlights the API:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(Podman ps -l -q --no-trunc)/userdata/config.json | jq .
 ```
 
 Podman has not started a container, just created the config.json and immediately exited. Notice under the STATUS column, that the container is now in the Exited state:
@@ -898,7 +898,7 @@ In the Manifest, you should see one or more Config and Layers entries:
 (Note if `jq` is not installed, run `sudo dnf install -y jq` first)
 
 ```
-cat manifest.json | jq
+jq . manifest.json
 ```
 
 In the Config file, note that all of the metadata is similar to command line options in Docker & Podman:
@@ -932,7 +932,7 @@ Now, let's start with some experiments. Being the reference implementation for t
 ```
 sudo dnf install -y runc
 cd ~/fedora && runc spec
-cat config.json | jq
+jq . config.json
 ```
 
 The simple file created by `runc` is a good introduction, but to truly understand the breadth of what a container engine does, we need to look at a more complex example. Podman has the ability to create a container and generate a spec file without actually starting the container:

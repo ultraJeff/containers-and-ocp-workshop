@@ -72,7 +72,7 @@ See the test file there. You will see this file in our container later when we s
 At this point the container image has been cached locally and mounted, but we don't actually have a spec file for runc yet. Creating a spec file from hand is quite tedious because they are made up of complex JSON with a lot of different options (governed by the OCI runtime spec). Luckily for us, the container engine will create one for us. This exact same spec file can be used by any OCI compliant runtime can consume it (runc, crun, katacontainers, gvisor, etc). Let's run some experiments to show when it's created. First let's inspect the place where it should be:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json | jq .
 ```
 
 The above command errors out because the container engine hasn't created the config.json file yet. We will initiate the creation of this file by using podman combined with a specially constructed container image:
@@ -84,7 +84,7 @@ podman start on-off-container
 Now, the config.json file has been created. Inspect it for a while. Notice that there are options in there that are strikingly similar to the command line options of podman. The spec file really highlights the API:
 
 ```
-cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json|jq .
+cat /var/lib/containers/storage/overlay-containers/$(podman ps -l -q --no-trunc)/userdata/config.json | jq .
 ```
 
 Podman has not started a container, just created the config.json and immediately exited. Notice under the STATUS column, that the container is now in the Exited state:
