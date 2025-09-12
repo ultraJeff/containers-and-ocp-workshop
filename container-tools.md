@@ -20,7 +20,7 @@
 
 ## An Overview of Container Tools
 
-In this chapter we're going to cover a plethora of container tools available in Red Hat Enterprise Linux (RHEL), including Podman, Buildah, Skopeo, CRIU and Udica. Before we get into the specific tools, it's important to understand how these are tools are provided to the end user in the Red Hat ecosystem.
+In this chapter we're going to cover a plethora of container tools available in Red Hat Enterprise Linux (RHEL), including Podman, Buildah, Skopeo. Before we get into the specific tools, it's important to understand how these are tools are provided to the end user in the Red Hat ecosystem.
 
 The RHEL kernel, systemd, and the container tools, centered around [containers](github.com/containers) and [CRI-O](github.com/cri-o/cri-o), serve as the foundation for both **RHEL Server** as well as **RHEL CoreOS**. **RHEL Server** is a flexible, general purpose operating system which can be customized for many different use cases. On the other hand, **RHEL CoreOS** is a minimal, purpose built operating system intended to be consumed within automated environments like OpenShift. This lab will specifically cover the tools available in **RHEL Server**, but much of what you learn is useful with **RHEL CoreOS** which is built from the same bits, but packaged specifically for OpenShift and Edge use cases.
 
@@ -38,7 +38,7 @@ For the rest of this lab, we will focus on the container tools provided in RHEL 
 
 With either stream, the underlying RHEL kernel, systemd, and other packages are treated as a rolling stream. The only choice is is whether to use the fast stream or one of the stable streams. Since RHEL provides a very stable [ABI/API Policy](https://access.redhat.com/articles/rhel8-abi-compatibility) the vast majority of container users will not notice and should not be concerned with kernel, systemd, glibc, etc updates on the container host. If the users selects one of the stable streams, the API to Podman will remains stable and updated for security.
 
-For a deeper dive, check out [RHEL 8 enables containers with the tools of software craftsmanship](https://www.redhat.com/en/blog/rhel-8-enables-containers-tools-software-craftsmanship-0). Now, let's move on to installing and using these different streams of software.
+<!-- For a deeper dive, check out [RHEL 8 enables containers with the tools of software craftsmanship](https://www.redhat.com/en/blog/rhel-8-enables-containers-tools-software-craftsmanship-0). Now, let's move on to installing and using these different streams of software. -->
 
 <!-- TODO yum module list doesn't list container-tools -->
 <!-- ## Using the Fast and Stable Streams
@@ -187,7 +187,7 @@ There's no Podman process, which might be confusing. Let's explain this a bit. W
 
 In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before runc called conmon (Container Monitor). The conmon utility disconnects the container from the engine by doing forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
 
-`bash -> podman -> conmon -> conmon -> runc -> bash`
+`bash -> podman -> conmon -> conmon -> crun -> bash`
 
 Or like this with CRI-O:
 
@@ -197,7 +197,7 @@ Or like this with Docker engine:
 
 `systemd -> dockerd -> containerd -> docker-shim -> runc -> bash`
 
-Conmon is a very small C program that monitors the standard in, standard error, and standard out of the containerized process. The conmon utility and docker-shim both serve the same purpose. When the first conmon finishes calling the second, it exits. This disconnects the second conmon and all of its child processes from the container engine. The second conmon then inherits init system (systemd) as its new parent process. This daemonless and simplified model which Podman uses can be quite useful when wiring it into other larger systems, like CI/CD, scripts, etc.
+**Conmon** is a very small C program that monitors the standard in, standard error, and standard out of the containerized process. The conmon utility and docker-shim both serve the same purpose. When the first conmon finishes calling the second, it exits. This disconnects the second conmon and all of its child processes from the container engine. The second conmon then inherits init system (systemd) as its new parent process. This daemonless and simplified model which Podman uses can be quite useful when wiring it into other larger systems, like CI/CD, scripts, etc.
 
 Podman doesn't require a daemon and it doesn't require root. These two features really set Podman apart from Docker. Even when you use the Docker CLI as a user, it connects to a daemon running as root, so the user always has the ability escalate a process to root and do whatever they want on the system. Worse, it bypasses sudo rules so it's not easy to track down who did it.
 
@@ -266,7 +266,7 @@ Alright, let's walk through some common scenarios with Buildah.
 ### Prep Work
 Just like Podman, Buildah can execute in rootless mode, but since you have tools on the container host interacting files in the container image, you need to make Buildah think it's running as root. Buildah comes with a cool sub-command called unshare which does just this. It puts our shell into a user namespace just like when you have a root shell in a container. The difference is, this shell has access to tools installed on the container host, instead of in the container image. Before we complete the rest of this lab, execute the "buildah unshare" command. Think of this as making yourself root, without actually making yourself root:
 
-```
+```bash
 sudo dnf install buildah
 
 buildah unshare
@@ -274,13 +274,13 @@ buildah unshare
 
 Now, look at who your shell thinks you are:
 
-```
+```bash
 whoami
 ```
 
 It's looks like you are root, but you really aren't, but let's prove it:
 
-```
+```bash
 touch /etc/shadow
 ```
 
@@ -290,69 +290,69 @@ The touch command fails because you're not actually root. Really, the touch comm
 
 First declare what image you want to start with as a source. In this case, we will start with Red Hat Universal Base Image:
 
-```
+```bash
 buildah from ubi8
 ```
 
 This will create a "reference" to what Buildah calls a "working container" - think of them as a starting point to attach mounts and commands. Check it out here:
 
-```
+```bash
 buildah containers
 ```
 
 Now, we can mount the image source. In effect, this will trigger the graph driver to do its magic, pull the image layers together, add a working copy-on-write layer, and mount it so that we can access it just like any directory on the system:
 
-```
+```bash
 buildah mount ubi8-working-container
 ```
 
 Now, lets add a single file to the new container image layer. The Buildah mount command can be ran again to get access to the right directory:
 
-```
+```bash
 echo "hello world" > $(buildah mount ubi8-working-container)/etc/hello.conf
 ```
 
 Lets analyze what we just did. It's super simple, but kind of mind bending if you come from using other container engines. First, list the directory in the copy-on-write layer:
 
-```
+```bash
 ls -alh $(buildah mount ubi8-working-container)/etc/
 ```
 
 You should see hello.conf right there. Now, cat the file:
 
-```
+```bash
 cat $(buildah mount ubi8-working-container)/etc/hello.conf
 ```
 
 You should see the text you expect. Now, lets commit this copy-on-write layer as a new image layer:
 
-```
+```bash
 buildah commit ubi8-working-container ubi8-hello
 ```
 
 Now, we can see the new image layer in our local cache. We can view it with either Podman or Buildah (or CRI-O for that matter, they all use the same image store):
 
-```
+```bash
 buildah images
 ```
 
-```
+```bash
 podman images
 ```
 
 When we are done, we can clean up our environment quite nicely. The following command will delete references to "working containers" and completely remove their mounts:
 
-```
+```bash
 buildah delete -a
 ```
 
 But, we still have the new image layer just how we want it. This could be pushed to a registry server to be shared with others if we like:
 
-```
+```bash
 buildah images
 ```
 
-```
+```bash
 podman images
 ```
 
@@ -360,59 +360,59 @@ podman images
 
 Create a new working container, mount the image, and get a working copy-on-write layer:
 
-```
+```bash
 WORKING_MOUNT=$(buildah mount $(buildah from scratch))
 echo $WORKING_MOUNT
 ```
 
 Verify that there is nothing in the directory:
 
-```
+```bash
 ls -alh $WORKING_MOUNT
 ```
 
 Now, lets install some basic tools (don't worry about the entitlement errors):
 
-```
+```bash
 dnf install --installroot $WORKING_MOUNT bash coreutils --releasever 8 --setopt install_weak_deps=false -y
 dnf clean all -y --installroot $WORKING_MOUNT --releasever 8
 ```
 
 Verify that some files have been added:
 
-```
+```bash
 ls -alh $WORKING_MOUNT
 ```
 
 Now, commit the copy-on-write layer as a new container image layer:
 
-```
+```bash
 buildah commit working-container minimal
 ```
 
 Now, test the new image layer, by creating a container:
 
-```
+```bash
 podman run -it minimal bash
 ```
 
-```
+```bash
 exit
 ```
 
 Clean things up for our next experiment:
 
-```
+```bash
 buildah delete -a
 ```
 
-We have just created a container image layer from scratch without ever installing RPM or DNF. This same pattern can be used to solve countless problems. Makefiles often have the option of specifying the output directory, etc. This can be used to build a C program without ever installing the C toolchain in a container image layer. This is best for production security where we don't want the build tools laying around in the container.
+**We have just created a container image layer from scratch without ever installing RPM, DNF, or yum.** This same pattern can be used to solve countless problems. Makefiles often have the option of specifying the output directory, etc. This can be used to build a C program without ever installing the C toolchain in a container image layer. This is best for production security where we don't want the build tools laying around in the container.
 
 ### External Build Time Mounts
 
-As a final example, lets use a build time mount to show how we can pull data in. This will represent some sort of cached data that we are using outside of the container. This could be a repository of Ansible Playbooks, or even Database test data:
+As a final example, let's use a build time mount to show how we can pull data in. This will represent some sort of cached data that we are using outside of the container. This could be a repository of Ansible Playbooks, or even Database test data:
 
-```
+```bash
 mkdir ~/data
 dd if=/dev/zero of=~/data/test.bin bs=1MB count=100
 ls -alh ~/data/test.bin
@@ -420,27 +420,27 @@ ls -alh ~/data/test.bin
 
 Now, lets fire up a working container:
 
-```
+```bash
 buildah from ubi8
 buildah mount ubi8-working-container
 ```
 
-To consume the data within the container, we use the buildah-run subcommand. Notice that it takes the -v option just like "run" in Podman. We also use the Z option to relabel the data for SELinux. The dd command simply represents consuming some smaller portion of the data during the build process:
+To consume the data within the container, we use the `buildah-run` subcommand. Notice that it takes the `-v` option just like "run" in Podman. We also use the Z option to relabel the data for SELinux. The `dd` command simply represents consuming some smaller portion of the data during the build process:
 
-```
+```bash
 buildah run -v ~/data:/data:Z ubi8-working-container dd if=/data/test.bin of=/etc/small-test.bin bs=100 count=2
 ```
 
 Commit the new image layer and clean things up:
 
-```
+```bash
 buildah commit ubi8-working-container ubi8-data
 buildah delete -a
 ```
 
 Test it and note that we only kept the pieces of the data that we wanted. This is just an example, but imagine using this with a Makefile cache, or Ansible playbooks, or even a copy of production database data which needs to be used to test the image build or do a schema upgrade, which must be accessed during the image build process. There are tons of places where you need to access data, only at build time, but don't want it during production deployment:
 
-```
+```bash
 podman run -it ubi8-data ls -alh /etc/small-test.bin
 ```
 
@@ -448,7 +448,7 @@ podman run -it ubi8-data ls -alh /etc/small-test.bin
 
 Exit the user namespace:
 
-```
+```bash
 exit
 ```
 
@@ -458,6 +458,8 @@ Now, you have a pretty good understanding of the cases where Buildah really shin
 
 Now, lets move on to sharing containers with Skopeo...
 
+<!-- New Section -->
+
 ## Skopeo: Moving & Sharing
 
 In this step, we are going to do a couple of simple exercises with Skopeo to give you a feel for what it can do. Skopeo doesn't need to interact with the local container storage (.local/share/containers), it can move directly between registries, between container engine storage, or even directories.
@@ -466,7 +468,7 @@ In this step, we are going to do a couple of simple exercises with Skopeo to giv
 
 First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image remotely before pulling it down to the local cache. This allows us to inspect the metadata of the image and see if we really want to use it, without synchronizing it to the local image cache:
 
-```
+```bash
 sudo dnf install skopeo
 
 skopeo inspect docker://registry.fedoraproject.org/fedora
@@ -474,7 +476,7 @@ skopeo inspect docker://registry.fedoraproject.org/fedora
 
 We can easily see the "Architecture" and "Os" metadata which tells us a lot about the image. We can also see the labels, which are consumed by most container engines, and passed to the runtime to be constructed as environment variables. By comparison, here's how to see this metadata in a running container:
 
-```
+```bash
 podman run --name metadata-container -id registry.fedoraproject.org/fedora bash
 podman inspect metadata-container
 ```
@@ -483,23 +485,23 @@ podman inspect metadata-container
 
 Like, Podman, Skopeo can be used to pull images down into the local container storage:
 
-```
+```bash
 skopeo copy docker://registry.fedoraproject.org/fedora containers-storage:fedora
 ```
 
 But, it can also be used to pull them into a local directory:
 
-```
+```bash
 skopeo copy docker://registry.fedoraproject.org/fedora dir:$HOME/fedora-skopeo
 ```
 
 This has the advantage of not being mapped into our container storage. This can be convenient for security analysis:
 
-```
+```bash
 ls -alh ~/fedora-skopeo
 ```
 
-The Config and Image Layers are there, but remember we need to rely on a [Graph Driver](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.kvykojph407z) in a [Container Engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) to map them into a RootFS.
+The Config and Image Layers are there, but remember we need to rely on a [graph driver](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.kvykojph407z) in a [container engine](https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction/#h.6yt1ex5wfo3l) to map them into a RootFS.
 
 <!-- ### Moving Between Container Storage (Podman & Docker)
 
@@ -534,7 +536,7 @@ This can be useful when testing and getting comfortable with other OCI complaint
 
 Finally, lets copy from one registry to another. I have set up a writeable repository under my username (fatherlinux) on quay.io. To do this, you have to use the credentials provided below. Notice, that we use the "--dest-creds" option to authenticate. We can also use the "--source-cred" option to pull from a registry which requires authentication. This tool is very flexible. Designed by engineers, for engineers.
 
-```
+```bash
 skopeo copy docker://registry.fedoraproject.org/fedora docker://quay.io/fatherlinux/fedora --dest-creds fatherlinux+fedora:5R4YX2LHHVB682OX232TMFSBGFT350IV70SBLDKU46LAFIY6HEGN4OYGJ2SCD4HI
 ```
 
