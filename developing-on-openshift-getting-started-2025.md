@@ -86,7 +86,7 @@ OpenShift's Source-to-Image (S2I) capability allows you to build a runnable cont
 
 OpenShift will now build and deploy your application. You will be dropped off in the "Topology" view to monitor the progess.
 
-![alt text](./assetsimages/image.png)
+![alt text](./assets/images/image.png)
 
 ## Scaling Your Application
 
