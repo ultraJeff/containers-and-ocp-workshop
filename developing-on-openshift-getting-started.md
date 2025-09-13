@@ -1,6 +1,7 @@
 # Getting Started Developing on OpenShift
 
 - [Getting Started Developing on OpenShift](#getting-started-developing-on-openshift)
+  - [Log into Openshift](#log-into-openshift)
   - [Container Orchestration Primer](#container-orchestration-primer)
   - [Deploying with an Image](#deploying-with-an-image)
     - [Logging in with the Web Console](#logging-in-with-the-web-console)
@@ -24,7 +25,7 @@
 
 Welcome to this workshop on containers and OpenShift! Today, we will use a hosted OCP environment provided by your instructors, along with these instructions, as we journey through advanced container orchestration using Red Hat OpenShift.
 
-If you already have `oc` installed on your machine, feel free to use your own terminal for the CLI portion of this work
+<!-- If you already have `oc` installed on your machine, feel free to use your own terminal for the CLI portion of this work -->
 
 <!--
 , otherwise you may use OpenShift Dev Spaces.

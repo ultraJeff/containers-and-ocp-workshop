@@ -744,4 +744,4 @@ In general you should almost never see any unapplied patches in this latest buil
 
 ## Next Up
 
-Congratulations! You just completed the second module of today's workshop. Please continue to [Developing on OpenShift](./developing-on-openshift-getting-started.md).
+Congratulations! You just completed the second module of today's workshop. Please continue to [Developing on OpenShift](./developing-on-openshift-getting-started-2025.md).
