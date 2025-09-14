@@ -29,13 +29,13 @@
         - [Red Hat Container Catalog](#red-hat-container-catalog)
       - [Summary](#summary)
     - [Analyzing Storage and Graph Drivers](#analyzing-storage-and-graph-drivers)
-  - [Run Container Images with Hosts (Optional)](#run-container-images-with-hosts-optional)
+  - [Run Container Images with Hosts (Recommended)](#run-container-images-with-hosts-recommended)
     - [Container Engines \& The Linux Kernel](#container-engines--the-linux-kernel)
         - [How do people get it wrong? In two main ways:](#how-do-people-get-it-wrong-in-two-main-ways)
-    - [SELinux \& sVirt: Dynamically generated contexts to protect your containers (Optional)](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers-optional)
+    - [SELinux \& sVirt: Dynamically generated contexts to protect your containers](#selinux--svirt-dynamically-generated-contexts-to-protect-your-containers)
     - [Cgroups: Dynamically created with container instantiation](#cgroups-dynamically-created-with-container-instantiation)
     - [SECCOMP: Limiting how a containerized process can interact with the kernel](#seccomp-limiting-how-a-containerized-process-can-interact-with-the-kernel)
-  - [Architect a Better Environment (Optional)](#architect-a-better-environment-optional)
+  - [Architect a Better Environment (Recommended)](#architect-a-better-environment-recommended)
     - [Overview of The OCI Specifications](#overview-of-the-oci-specifications)
     - [The OCI Image Specification](#the-oci-image-specification)
     - [The OCI Runtime Specification](#the-oci-runtime-specification)
@@ -201,7 +201,7 @@ podman ps -ls
 podman top -l huser user hpid pid %C etime tty time args
 ```
 
-```
+```bash
 ps -ef | grep 3306
 ```
 
@@ -216,7 +216,7 @@ We will explore this deeper in later labs but, for now, commit this to memory, c
 
 The goal of this exercise is to understand the difference between base images and multi-layered images (repositories). Also, we'll try to understand the difference between an image layer and a repository.
 
-Let's take a look at some base images. We will use the Podman `history` command to inspect all of the layers in these repositories. Notice that these container images have no parent layers. These are base images, and they are designed to be built upon. First, let's look at the full ubi7 base image:
+Let's take a look at some base images. We will use the Podman `history` command to inspect all of the layers in these repositories. Notice that these container images have no parent layers. These are base images, and they are designed to be built upon. First, let's look at the full ubi9 base image:
 
 ```bash
 podman history registry.access.redhat.com/ubi9/ubi:latest
@@ -323,7 +323,7 @@ Notice that Podman resolves container images similar to DNS resolution. Each con
 
 ### Image Internals (Optional)
 
-Now, we will take a look at what's inside the container image. Java is particularly interesting because it uses glibc (the C programming language), even though most people don't realize it. We will use the `ldd` command to prove it, which shows you all of the libraries that a binary is linked against. When a binary is dynamically linked (libraries loaded when the binary starts), these libraries must be installed on the system, or the binary will not run. In this example you can see that getting a JVM to run with the exact same behavior requires compiling and linking in the same way. Stated another way, not all Java images are created equal.
+Now, we will take a look at what's inside the container image. Java is particularly interesting because it uses `glibc` (the C programming language), even though most people don't realize it. We will use the `ldd` command to prove it, which shows you all of the libraries that a binary is linked against. When a binary is dynamically linked (libraries loaded when the binary starts), these libraries must be installed on the system, or the binary will not run. In this example you can see that getting a JVM to run with the exact same behavior requires compiling and linking in the same way. Stated another way, not all Java images are created equal.
 
 ```bash
 podman run -it registry.access.redhat.com/jboss-eap-7/eap70-openshift ldd -v -r /usr/lib/jvm/java-1.8.0-openjdk/jre/bin/java
@@ -335,13 +335,13 @@ Notice that dynamic scripting languages are also compiled and linked against sys
 podman run -it registry.access.redhat.com/ubi7/ubi ldd /usr/bin/python
 ```
 
-Inspecting a common tool like "curl" demonstrates how many libraries are used from the operating system. First, start the RHEL Tools container. This is a special image that Red Hat releases with all of the tools necessary for troubleshooting in a containerized environment. It's rather large, but quite convenient.
+Inspecting a common tool like `curl` demonstrates how many libraries are used from the operating system. First, start the RHEL Tools container. This is a special image that Red Hat used to release with all of the tools necessary for troubleshooting in a containerized environment. It's quite convenient for this exercise.
 
 ```bash
 podman run -it registry.access.redhat.com/rhel7/rhel-tools bash
 ```
 
-Take a look at all of the libraries curl is linked against:
+Take a look at all of the libraries `curl` is linked against:
 
 ```bash
 ldd /usr/bin/curl
@@ -389,7 +389,7 @@ exit
 ```
 
 > [!IMPORTANT]
-> What does this all mean? Well, it means you need to be ready to rebuild all of your container images any time there is a security vulnerability in one of the libraries inside it.
+> What does this all mean? Well, it means **you need to be ready to rebuild all of your container images any time there is a security vulnerability** in one of the libraries inside it.
 
 <!-- TODO - New page? -->
 
@@ -515,6 +515,7 @@ podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo securi
 
 Regrettably, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output would look more like the following if we did:
 
+<!-- TODO: Update these to a real ouput from RHEL 9 - these are from RHEL 7 -->
 ```shell
 RHSA-2019:0679 Important/Sec. libssh2-1.4.3-12.el7_6.2.x86_64
 RHSA-2019:0710 Important/Sec. python-2.7.5-77.el7_6.x86_64
@@ -536,7 +537,7 @@ Now, that we have taken a look at several container images, we are going to star
 ##### Fedora Registry
 - Click: [registry.fedoraproject.org](https://registry.fedoraproject.org/)
 
-The Fedora registry provides a very basic experience. You know that it is operated by the Fedora project, so the security should be pretty similar to the ISOs you download. That said, there are no older versions of images, and there is really no stated policy about how often the images are patched, updated, or released.
+The Fedora registry is based on Quay.io and provides a list of container images along with a series of tags to provide older versions of the images. You know that it is operated by the Fedora project, so the security should be pretty similar to the ISOs you download. That said, there is really no stated policy about how often the images are patched, updated, or released.
 
 
 ##### Docker Hub
@@ -552,10 +553,9 @@ Similar to DockerHub, there is not a lot of information linking these repostorie
 
 
 ##### Red Hat Container Catalog
-- Click: [https://catalog.redhat.com](https://catalog.redhat.com/en/software/containers/ubi9/618326f8c0d15aff4912fe0b)
+- Click: [https://catalog.redhat.com](https://catalog.redhat.com/en/software/containers/ubi9/618326f8c0d15aff4912fe0b?image=686e9e544bbe88120c406c61&architecture=arm64)
 
-The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each respository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known
- vulnerabilities. That's because container images age like cheese, not like wine. Trust is fleeting and older container images age just like servers which are rarely or never patched.
+The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each respository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known vulnerabilities. That's because container images age like cheese, not like wine. Trust is fleeting and older container images age just like servers which are rarely or never patched.
 
 Now take a look at the Container Health Index scoring for each tag that is available. Notice, that the newer the tag, the better the letter grade. The Red Hat Container Catalog and Container Health Index clearly show you that the newer images have a less vulnerabiliites and hence have a better letter grade. To fully understand the scoring criteria, check out [Knowledge Base Article](https://access.redhat.com/articles/2803031). This is a completely unique capability provided by the Red Hat Container Catalog because container image Errata are produced tying container images to CVEs.
 
@@ -598,6 +598,16 @@ Now, let's take a look at Podman container engine. It pulls OCI compliant, Docke
 podman info  | grep -A4 graphRoot
 ```
 
+```bash
+  graphRoot: /home/student/.local/share/containers/storage
+  graphRootAllocated: 31465648128
+  graphRootUsed: 2823589888
+  graphStatus:
+    Backing Filesystem: xfs
+    Native Overlay Diff: "true"
+    Supports d_type: "true"
+```
+
 First, you might be asking yourself, [what the heck is d_type?](https://docs.docker.com/storage/storagedriver/overlayfs-driver/). Long story short, it's a filesystem option that must be supported for OverlayFS to work properly as a backing store for container images and running containers.
 
 Now,verify that the files are just mapped right into the filesystem:
@@ -614,7 +624,7 @@ For now, you understand enough about registry servers, repositories, and how ima
 
 <!-- TODO: Page Break -->
 
-## Run Container Images with Hosts (Optional)
+## Run Container Images with Hosts (Recommended)
 
 ### Container Engines & The Linux Kernel
 
@@ -795,7 +805,7 @@ podman kill on-off-container
 podman rm on-off-container
 ``` -->
 
-### SELinux & sVirt: Dynamically generated contexts to protect your containers (Optional)
+### SELinux & sVirt: Dynamically generated contexts to protect your containers
 Next, let's gain a basic understanding of SELinux/sVirt. Run the following commands:
 
 ```bash
@@ -813,9 +823,9 @@ system_u:system_r:container_t:s0:c228,c810 root 18682 18669  0 03:30 pts/0 00:00
 system_u:system_r:container_t:s0:c184,c827 root 18797 18785  0 03:30 pts/0 00:00:00 sleep 10
 ```
 
-Notice that each container is labeled with a dynamically generated [Multi Level Security (MLS)](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/mls) label. In the example above, the first container has an MLS label of c228,c810 while the second has a label of c184,c827. Since each of these containers is started with a different MLS label, they are prevented from accessing each other's memory, files, etc.
+Notice that each container is labeled with dynamically generated [Multi Level Security (MLS)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/using-multi-level-security-mls_using-selinux) and [Multi-Category Security](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/assembly_using-multi-category-security-mcs-for-data-confidentiality_using-selinux) labels. In the example above, both containers have an MLS label of `s0` meaning least sensitive, and the first container has an MCS label of c228,c810 while the second has a label of c184,c827. Since each of these containers is started with a different MCS label, they are prevented from accessing each other's memory, files, etc.
 
-SELinux doesn't just label the processes, it must also label the files accessed by the process. Make a directory for data, and inspect the SELinux label on the directory. Notice the type is set to "user_tmp_t" but there are no MLS labels set:
+SELinux doesn't just label the processes, it must also label the files accessed by the process. Make a directory for data, and inspect the SELinux label on the directory. Notice the type is set to "user_tmp_t" but there are no MCS labels set:
 
 ```bash
 mkdir /tmp/selinux-test
@@ -833,13 +843,16 @@ drwxrwxr-x.  2 student student unconfined_u:object_r:user_tmp_t:s0    6 Sep 12 0
 drwxrwxrwt. 10 root    root    system_u:object_r:tmp_t:s0          4.0K Sep 12 00:57 ..
 ```
 
-Now, run the following command a few times and notice the MLS labels change every time. This is sVirt at work:
+Now, run the following command a few times and notice the MCS labels change every time.
 
 ```bash
 podman run -t -v /tmp/selinux-test:/tmp/selinux-test:Z registry.access.redhat.com/ubi9/ubi ls -alhZ /tmp/selinux-test
 ```
 
-Finally, look at the MLS label set on the directory, it is always the same as the last container that was run. The :Z option auto-labels and bind mounts so that the container can access and change files on the mount point. This prevents any other process from accessing this data and is done transparently to the end user.
+> [!IMPORTANT]
+> This is sVirt (secure virtualization) at work. sVirt is a security technology that integrates SELinux (Security-Enhanced Linux) with virtualization to provide strong isolation for virtual machines (VMs) and containers.
+
+Finally, look at the MCS label set on the directory, it is always the same as the last container that was run. The :Z option auto-labels and bind mounts so that the container can access and change files on the mount point. This prevents any other process from accessing this data and is done transparently to the end user.
 
 ```bash
 ls -alhZ /tmp/selinux-test/
@@ -886,7 +899,7 @@ Notice how the chmod system call is blocked.
 
 <!-- TODO Page Break -->
 
-## Architect a Better Environment (Optional)
+## Architect a Better Environment (Recommended)
 
 ### Overview of The OCI Specifications
 
@@ -1063,5 +1076,7 @@ crun list
 In summary, we have learned how to create containers with a terse little program called `crun`. **This is the exact same program used by every major container engine on the planet.** In production, you would never create containers like this, but it's useful to understand what is going on under the hood in CRI-O, Podman and Docker. When you run into new projects like Kata, gVisor, and others, you will now understand exactly how and where they fit in into the software stack. -->
 
 ## Next Up
+
+To learn more about using containers in RHEL, check out the [official docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/assembly_starting-with-containers_building-running-and-managing-containers#con_characteristics-of-podman-buildah-and-skopeo_assembly_starting-with-containers).
 
 Congratulations! You just completed the first module of today's workshop. Please continue to [Container Tools](./container-tools.md).
