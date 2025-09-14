@@ -13,7 +13,7 @@
   - [Manage Your Containers](#manage-your-containers)
     - [Image Layers and Repositories](#image-layers-and-repositories)
     - [Image URLs](#image-urls)
-    - [Image Internals (Optional)](#image-internals-optional)
+    - [Image Internals (Optional Section)](#image-internals-optional-section)
   - [Understand Container Registries](#understand-container-registries)
     - [Understanding the Basics of Trust - Quality \& Provenance](#understanding-the-basics-of-trust---quality--provenance)
       - [Trusted Thing](#trusted-thing)
@@ -214,13 +214,18 @@ We will explore this deeper in later labs but, for now, commit this to memory, c
 
 ### Image Layers and Repositories
 
-The goal of this exercise is to understand the difference between base images and multi-layered images (repositories). Also, we'll try to understand the difference between an image layer and a repository.
+The goal of this exercise is to understand the difference between base images and multi-layered images. Also, we'll try to understand the difference between an image tag and a repository.
 
 Let's take a look at some base images. We will use the Podman `history` command to inspect all of the layers in these repositories. Notice that these container images have no parent layers. These are base images, and they are designed to be built upon. First, let's look at the full ubi9 base image:
 
 ```bash
+# Uncomment this line if you did not pull the image earlier
+# podman pull registry.access.redhat.com/ubi9/ubi:latest
 podman history registry.access.redhat.com/ubi9/ubi:latest
 ```
+
+> [!NOTE]
+> Podman is only able to see the history of image repositories stored locally. If you try to run `podman history` on an image you do not have a copy of locally, it will fail.
 
 Now let's take a look at the minimal base image, which is part of the Red Hat Universal Base Image (UBI) collection. Notice that it's quite a bit smaller:
 
@@ -252,7 +257,7 @@ Do you see the newly created `localhost/ubi9-change` tag?
 podman images
 ```
 
-Can you see all of the layers that make up the new image/repository/tag? This command even shows a short summary of the commands run in each layer. This is very convenient for exploring how an image was made.
+Can you see all of the layers that make up the new image/repository + tag? This command even shows a short summary of the commands run in each layer. This is very convenient for exploring how an image was made.
 
 ```bash
 podman history ubi9-change
@@ -261,7 +266,7 @@ podman history ubi9-change
 Notice that the first image ID (bottom, not `<missing>`) listed in the output matches the `registry.access.redhat.com/ubi9/ubi` image. Remember, it is important to build on a trusted base image from a trusted source to maintain provenance and chain of custody.
 
 > [!IMPORTANT]
-> Container repositories are made up of layers, but we often refer to them simply as container images or containers. When architecting systems, we must be precise with our language, or we will cause confusion to our end users.
+> Container repositories encompass all of the tags associated with a container image, but we often refer to them simply as container images or containers. When architecting systems, we must be precise with our language, or we will cause confusion to our end users.
 
 ### Image URLs
 
@@ -280,11 +285,11 @@ podman inspect registry.access.redhat.com/ubi9/ubi:latest
 You can run any of the following commands, and you will get the exact same results as well:
 
 ```bash
-podman inspect registry.access.redhat.com/ubi9/ubi:latest
+podman inspect registry.access.redhat.com/ubi9/ubi
 ```
 
 ```bash
-podman inspect registry.access.redhat.com/ubi9/ubi
+podman inspect registry.access.redhat.com/ubi9
 ```
 
 ```bash
@@ -292,7 +297,11 @@ podman inspect ubi9/ubi:latest
 ```
 
 ```bash
-podman inspect ubi
+podman inspect ubi9/ubi
+```
+
+```bash
+podman inspect ubi9
 ```
 
 Now let's build another image, but give it a tag other than "latest":
@@ -313,7 +322,7 @@ Now try the resolution trick again. What happened?
 podman inspect ubi9
 ```
 
-It failed, but why? Try again with a complete URL:
+It pulled up the latest tag, but why? Podman defaults to using the "latest" tag when unspecified. Try again with a complete URL:
 
 ```bash
 podman inspect ubi9:test
@@ -321,7 +330,10 @@ podman inspect ubi9:test
 
 Notice that Podman resolves container images similar to DNS resolution. Each container engine is different, and Docker will actually resolve some things Podman doesn't because there is no standard on how image URIs are resolved. If you test long enough, you will find many other caveats to namespace, repository, and tag resolution. Generally, it's best to always use the full URI, specifying the server, namespace, repository, and tag. Remember this when building scripts. Containers seem deceptively easy, but you need to pay attention to details.
 
-### Image Internals (Optional)
+> [!IMPORTANT]
+> **Takeaway**: What is often called an "image" is, in fact, an image repository. These are made up of many image layers represented by tags that are all stored together under one name like `ubi9`. Often the image name also contains the *registry* when the upstream image is stored.
+
+### Image Internals (Optional Section)
 
 Now, we will take a look at what's inside the container image. Java is particularly interesting because it uses `glibc` (the C programming language), even though most people don't realize it. We will use the `ldd` command to prove it, which shows you all of the libraries that a binary is linked against. When a binary is dynamically linked (libraries loaded when the binary starts), these libraries must be installed on the system, or the binary will not run. In this example you can see that getting a JVM to run with the exact same behavior requires compiling and linking in the same way. Stated another way, not all Java images are created equal.
 
