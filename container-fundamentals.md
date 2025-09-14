@@ -4,7 +4,7 @@ Welcome to this workshop on containers and OpenShift! Today, we will use a hoste
 
 ## Get Ready for the Workshop
 
-First off, start by visiting the [Container Fundamentals Workshop page](red.ht/bw-containers-workshop), log in, and use the SSH information with a local terminal or the lab user interface to open a shell.
+First off, start by visiting the [Container Fundamentals Workshop page](https://red.ht/bw-containers-workshop), log in, and use the SSH information with a local terminal or the lab user interface to open a shell.
 
 - [Container Fundamentals](#container-fundamentals)
   - [Get Ready for the Workshop](#get-ready-for-the-workshop)
