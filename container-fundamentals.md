@@ -1,11 +1,5 @@
 # Container Fundamentals
 
-Welcome to this workshop on containers and OpenShift! Today, we will use a hosted environment provided by your instructor, along with these instructions, as we journey from simple Linux containers to advanced container orchestration using Red Hat OpenShift. Let's begin!
-
-## Get Ready for the Workshop
-
-First off, start by visiting the [Container Fundamentals Workshop page](https://red.ht/bw-containers-workshop), log in, and use the SSH information with a local terminal or the lab user interface to open a shell.
-
 - [Container Fundamentals](#container-fundamentals)
   - [Get Ready for the Workshop](#get-ready-for-the-workshop)
   - [Get Started with Containers](#get-started-with-containers)
@@ -46,6 +40,14 @@ First off, start by visiting the [Container Fundamentals Workshop page](https://
     - [The OCI Image Specification](#the-oci-image-specification)
     - [The OCI Runtime Specification](#the-oci-runtime-specification)
   - [Next Up](#next-up)
+
+
+Welcome to this workshop on containers and OpenShift! Today, we will use a hosted environment provided by your instructor, along with these instructions, as we journey from simple Linux containers to advanced container orchestration using Red Hat OpenShift. Let's begin!
+
+## Get Ready for the Workshop
+
+First off, start by visiting the [Container Fundamentals Workshop page](https://red.ht/bw-containers-workshop), log in, and use the SSH information with a local terminal or the lab user interface to open a shell.
+
 
 ## Get Started with Containers
 
