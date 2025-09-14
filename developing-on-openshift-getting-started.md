@@ -1,6 +1,6 @@
-# Getting Started Developing on OpenShift
+# Getting Started Developing on OpenShift (Old)
 
-- [Getting Started Developing on OpenShift](#getting-started-developing-on-openshift)
+- [Getting Started Developing on OpenShift (Old)](#getting-started-developing-on-openshift-old)
   - [Log into Openshift](#log-into-openshift)
   - [Container Orchestration Primer](#container-orchestration-primer)
   - [Deploying with an Image](#deploying-with-an-image)
