@@ -153,7 +153,7 @@ List running containers:
 podman ps -a
 ```
 
-Now, let's move on to some features that differentiates Podman from Docker. Specifically, let's cover the two most popular reasons - Podman runs without a daemon (daemonless) and without root (rootless). Podman is an interactive command more like bash, and like bash it can be run as a regular user (aka. rootless).
+Now, let's move on to some features that differentiates Podman from Docker. Specifically, let's cover the two most popular reasons - Podman runs without a daemon (daemonless) and without root (rootless). Podman is an interactive command more like bash, and like bash it can be run as a regular user (a.k.a. rootless).
 
 <!-- The container host we are working with already has a user called RHEL, so let's switch over to it. Note, we set a couple of environment variables manually because we're using the switch user command. These would normally be set at login:
 

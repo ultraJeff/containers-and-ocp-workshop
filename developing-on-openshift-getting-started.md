@@ -65,7 +65,7 @@ And finally, open the terminal by clicking the hamburger menu icon on the top le
 
 -->
 ## Log into Openshift
-Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `login command` into the bastion.
+Go back to your [workshop landing page](red.ht/bw-ocp-workshop) (you may need to login again using the same email address as before) and paste the `login command` into the bastion.
 
 
 Now, you are ready to begin this workshop module!
@@ -203,7 +203,7 @@ Your first task is to log into OpenShift from the web console. (Skip to Step 2 i
 ----
 
 `Step 1:`
-Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
+Go back to your [workshop landing page](red.ht/bw-ocp-workshop) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
 
 You will be presented with the OpenShift login screen. Use the following credentials to log in.
 

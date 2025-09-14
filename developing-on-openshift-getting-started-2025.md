@@ -43,7 +43,7 @@ This workshop will guide you through the basics of getting started with OpenShif
 Your first task is to log into OpenShift from the web console.
 
 
-Go back to your [workshop landing page](https://demo.redhat.com/workshop/c8wjq) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
+Go back to your [workshop landing page](red.ht/bw-ocp-workshop) (you may need to login again using the same email address as before) and paste the `console_url` into your browser.
 
 Use the credentials `user` and `password` from the landing page to login.
 
