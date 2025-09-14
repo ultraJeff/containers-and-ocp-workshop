@@ -6,7 +6,7 @@
   - [Buildah: Granularity \& Control](#buildah-granularity--control)
     - [Prep Work](#prep-work)
     - [Basic Build](#basic-build)
-    - [Using Tools Outside The Container](#using-tools-outside-the-container)
+    - [Working with Scratch Images (and Using Tools Outside The Container)](#working-with-scratch-images-and-using-tools-outside-the-container)
     - [External Build Time Mounts](#external-build-time-mounts)
     - [Cleanup](#cleanup)
     - [Conclusions](#conclusions)
@@ -26,19 +26,19 @@ The RHEL kernel, systemd, and the container tools, centered around [containers](
 
 Here's a quick overview of how to think about RHEL Server versus RHEL CoreOS:
 
-1. General Purpose: User -> Podman -> RHEL Server
-2. OpenShift: User -> Kubernetes API -> Kubelet -> CRI-O -> RHEL CoreOS
+1. General Purpose: User > Podman > RHEL Server
+2. OpenShift: User > Kubernetes API > Kubelet > CRI-O > RHEL CoreOS
 
 In a RHEL Server environment, the end user will create containers directly on the container host with Podman. In an OpenShift environment, the end user will create containers through the Kubernetes API - users generally do not interact directly with CRI-O on individual hosts in the cluster. **Stated another way, Podman is the primary container interface in RHEL, while Kubernetes is the primary interface in OpenShift**.
 
-For the rest of this lab, we will focus on the container tools provided in RHEL Server. The launch of RHEL8 introduced the concept of [Application Streams](https://www.redhat.com/en/blog/introduction-appstreams-and-modules-red-hat-enterprise-linux), which provide users with access to the latest versions of software like Python, Ruby, and Podman. These Application Streams have different, and often shorter life cycles than RHEL (10+ years). Specifically, RHEL8 Server provides users with two types of Application Streams for Container tools:
+<!-- For the rest of this lab, we will focus on the container tools provided in RHEL Server. The launch of RHEL8 introduced the concept of [Application Streams](https://www.redhat.com/en/blog/introduction-appstreams-and-modules-red-hat-enterprise-linux), which provide users with access to the latest versions of software like Python, Ruby, and Podman. These Application Streams have different, and often shorter life cycles than RHEL (10+ years). Specifically, RHEL8 Server provided users with two types of Application Streams for Container tools:
 
 1. Fast: Rolling stream which is updated with new versions of Podman and other tools up to every 12 weeks, and only supported until the next version is released. This stream is for users looking for the latest features in Podman.
 2. Stable: Traditional streams released once per year, and supported for 24 months. Once released these streams do not update versions of Podman and other tools, and only provide security fixes. This stream is for users looking to put Podman into production depending on stability.
 
 With either stream, the underlying RHEL kernel, systemd, and other packages are treated as a rolling stream. The only choice is is whether to use the fast stream or one of the stable streams. Since RHEL provides a very stable [ABI/API Policy](https://access.redhat.com/articles/rhel8-abi-compatibility) the vast majority of container users will not notice and should not be concerned with kernel, systemd, glibc, etc updates on the container host. If the users selects one of the stable streams, the API to Podman will remains stable and updated for security.
 
-<!-- For a deeper dive, check out [RHEL 8 enables containers with the tools of software craftsmanship](https://www.redhat.com/en/blog/rhel-8-enables-containers-tools-software-craftsmanship-0). Now, let's move on to installing and using these different streams of software. -->
+For a deeper dive, check out [RHEL 8 enables containers with the tools of software craftsmanship](https://www.redhat.com/en/blog/rhel-8-enables-containers-tools-software-craftsmanship-0). Now, let's move on to installing and using these different streams of software. -->
 
 <!-- TODO yum module list doesn't list container-tools -->
 <!-- ## Using the Fast and Stable Streams
@@ -128,7 +128,7 @@ The goal of this lab is to introduce you to Podman and some of the features that
 Pull an image:
 
 ```bash
-podman pull ubi8
+podman pull ubi9
 ```
 
 List locally cached images:
@@ -140,7 +140,7 @@ podman images
 Start a container and run bash interactively in the local terminal. When ready, exit:
 
 ```bash
-podman run -it ubi8 bash
+podman run -it ubi9 bash
 ```
 
 ```bash
@@ -165,7 +165,7 @@ export XDG_RUNTIME_DIR=/home/rhel
 Now, fire up a simple container in the background:
 
 ```bash
-podman run -id ubi8 bash
+podman run -id ubi9 bash
 ```
 
 Now, lets analyze a couple of interesting things that makes Podman different than Docker - it doesn't use a client server model, which is useful for wiring it into CI/CD systems, and other schedulers like Yarn:
@@ -179,29 +179,30 @@ pstree -Slnc
 You should see something similar to:
 
 ```bash
-└─conmon─┬─{conmon}
-         └─bash(ipc,mnt,net,pid,uts)
+└─conmon───bash(cgroup,ipc,mnt,net,pid,uts)
 ```
 
-There's no Podman process, which might be confusing. Let's explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of metadata in `~/.local/share/containers` (`/var/lib/containers` is only used for containers started by root) which tracks which containers are created, running, and stopped (killed). The metadata that Podman tracks is what enables a `podman ps` command to work.
+> [!IMPORTANT]
+> There's no Podman process, which might be confusing. Let's explain this a bit. What many people don't know is that containers disconnect from Podman after they are started. Podman keeps track of metadata in `~/.local/share/containers` (`/var/lib/containers` for containers started by root) which tracks which containers are created, running, and stopped (killed). The metadata that Podman tracks is what enables a `podman ps` command to work.
 
-In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before runc called conmon (Container Monitor). The conmon utility disconnects the container from the engine by doing forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
+In the case of Podman, containers disconnect from their parent processes so that they don't die when Podman exits. In the case of Docker and CRI-O which are daemons, containers disconnect from the parent process so that they don't die when the daemon is restarted. For Podman and CRI-O, there is utility which runs before `crun`/`runc` called `conmon` (Container Monitor). The `conmon` utility disconnects the container from the engine by forking twice (called a double fork). That means, the execution chain looks something like this with Podman:
 
-`bash -> podman -> conmon -> conmon -> crun -> bash`
+`bash > podman > conmon > conmon > crun > bash`
 
 Or like this with CRI-O:
 
-`systemd -> crio -> conmon -> conmon -> runc -> bash`
+`systemd > crio > conmon > conmon > runc > bash`
 
 Or like this with Docker engine:
 
-`systemd -> dockerd -> containerd -> docker-shim -> runc -> bash`
+`systemd > dockerd > containerd > docker-shim > runc > bash`
 
-**Conmon** is a very small C program that monitors the standard in, standard error, and standard out of the containerized process. The conmon utility and docker-shim both serve the same purpose. When the first conmon finishes calling the second, it exits. This disconnects the second conmon and all of its child processes from the container engine. The second conmon then inherits init system (systemd) as its new parent process. This daemonless and simplified model which Podman uses can be quite useful when wiring it into other larger systems, like CI/CD, scripts, etc.
+**Conmon** is a very small C program that monitors the standard in, standard error, and standard out of the containerized process. The `conmon` utility and `docker-shim` both serve the same purpose. When the first `conmon` finishes calling the second, it exits. This disconnects the second `conmon` and all of its child processes from the container engine. The second `conmon` then inherits init system (systemd) as its new parent process. This daemonless and simplified model which Podman uses can be quite useful when wiring it into other larger systems, like CI/CD, scripts, etc.
 
-Podman doesn't require a daemon and it doesn't require root. These two features really set Podman apart from Docker. Even when you use the Docker CLI as a user, it connects to a daemon running as root, so the user always has the ability escalate a process to root and do whatever they want on the system. Worse, it bypasses sudo rules so it's not easy to track down who did it.
+> [!IMPORTANT]
+> Podman doesn't require a daemon and it doesn't require root. These two features really set Podman apart from Docker. Even when you use the Docker CLI as a user, it connects to a daemon running as root, so the user always has the ability escalate a process to root and do whatever they want on the system. Worse, it bypasses sudo rules so it's not easy to track down who did it.
 
-Now, let's move on to some other really interesting features. Rootless containers use a kernel feature called User Namespaces. This maps the one or more user IDs in the container to one or more user IDs outside of the container. This includes the root user ID in the container as well as any others which might be used by programs like nginx or Apache.
+Now, let's move on to some other really interesting features. Rootless containers use a kernel feature called **User Namespaces**. This maps the one or more user IDs in the container to one or more user IDs outside of the container. This includes the root user ID in the container as well as any others which might be used by programs like nginx or Apache.
 
 Podman makes it super easy to see this mapping. Start an nginx container to see the user and group mapping in action:
 
@@ -215,7 +216,14 @@ Now, execute the Podman bash command:
 podman top -l args huser hgroup hpid user group pid seccomp label
 ```
 
-Notice that the host user, group and process ID *in* the container all map to different and real IDs on the host system. The container thinks that nginx is running as the user `default` and the group `root` but really it's running as an arbitrary user and group. This user and group are selected from a range configured for the `student` user account on this system. This list can easily be inspected with the following commands:
+```bash
+COMMAND                                      HUSER       HGROUP      HPID        USER        GROUP       PID         SECCOMP     LABEL
+nginx: master process nginx -g daemon off;   166536      1001        44609       default     root        1           filter      system_u:system_r:container_t:s0:c476,c785
+nginx: worker process                        166536      1001        44619       default     root        10          filter      system_u:system_r:container_t:s0:c476,c785
+nginx: worker process                        166536      1001        44620       default     root        11          filter      system_u:system_r:container_t:s0:c476,c785
+```
+
+Notice that the user, group and process ID *in* the container all map to different and real IDs on the host system. The container thinks that nginx is running as the user `default` and the group `root` but really it's running as an arbitrary user and group. This user and group are selected from a range configured for the `student` user account on this system. This list can easily be inspected with the following commands:
 
 ```shell
 cat /etc/subuid
@@ -227,17 +235,17 @@ You will see something similar to this:
 student:165536:65536
 ```
 
-The first number represents the starting user ID, and the second number represents the number of user IDs which can be used from the starting number. So, in this example, our `student` user can use 65,535 user IDs starting with user ID 165536. The Podman bash command should show you that nginx is running in this range of UIDs.
+The first number represents the starting user ID, and the second number represents the number of user IDs which can be used from the starting number. So, in this example, our `student` user can use 65,535 user IDs starting with user ID `165536`. The Podman bash command should show you that nginx is running in this range of UIDs.
 
-The user ID mappings on your system might be different because shadow utilities (useradd, usderdel, usermod, groupadd, etc) automatically creates these mappings when a user is added. As a side note, if you've updated from an older version of RHEL, you might need to add entries to /etc/subuid and /etc/subgid manually.
+<!-- The user ID mappings on your system might be different because shadow utilities (useradd, usderdel, usermod, groupadd, etc) automatically creates these mappings when a user is added. As a side note, if you've updated from an older version of RHEL, you might need to add entries to `/etc/subuid` and `/etc/subgid` manually. -->
 
-OK, now stop all of the running containers. No more one liners like with Docker, it's just built in with Podman:
+OK, now stop all of the running containers. It's just built in with Podman:
 
 ```bash
 podman kill --all
 ```
 
-Remove all of the actively defined containers. It should be noted that this might be described as deleting the copy-on-write layer, config.json (commonly referred to as the Config Bundle) as well as any state data (whether the container is defined, running, etc):
+Remove all of the actively defined containers. It should be noted that this might be described as deleting the copy-on-write layer, `config.json` (commonly referred to as the Config Bundle from the previous page) as well as any state data (whether the container is defined, running, etc):
 
 ```bash
 podman rm --all
@@ -264,18 +272,18 @@ Now let's introduce you to Buildah and the flexibility it provides when you need
 Alright, let's walk through some common scenarios with Buildah.
 
 ### Prep Work
-Just like Podman, Buildah can execute in rootless mode, but since you have tools on the container host interacting files in the container image, you need to make Buildah think it's running as root. Buildah comes with a cool sub-command called unshare which does just this. It puts our shell into a user namespace just like when you have a root shell in a container. The difference is, this shell has access to tools installed on the container host, instead of in the container image. Before we complete the rest of this lab, execute the "buildah unshare" command. Think of this as making yourself root, without actually making yourself root:
+Just like Podman, Buildah can execute in rootless mode, but since you have tools on the container host interacting files in the container image, you need to make Buildah think it's running as root. Buildah comes with a cool sub-command called `unshare` which does just this. It puts our shell into a user namespace just like when you have a root shell in a container. The difference is, this shell has access to tools installed on the container host, instead of in the container image. Before we complete the rest of this lab, execute the `buildah unshare` command. Think of this as making yourself root, without actually making yourself root:
 
 ```bash
 sudo dnf install buildah
-
 buildah unshare
 ```
 
 Now, look at who your shell thinks you are:
 
 ```bash
-whoami
+[root@bastion ~]# whoami
+root
 ```
 
 It's looks like you are root, but you really aren't, but let's prove it:
@@ -284,50 +292,52 @@ It's looks like you are root, but you really aren't, but let's prove it:
 touch /etc/shadow
 ```
 
-The touch command fails because you're not actually root. Really, the touch command executed as an arbitrary user ID in your /etc/subuid range. Let that sink in. Linux containers are mind bending. OK, let's do something useful.
+The touch command fails because you're not actually root. Really, the touch command executed as an arbitrary user ID in your `/etc/subuid` range. OK, let's do something useful.
 
 ### Basic Build
 
 First declare what image you want to start with as a source. In this case, we will start with Red Hat Universal Base Image:
 
 ```bash
-buildah from ubi8
+buildah from ubi9
 ```
 
 This will create a "reference" to what Buildah calls a "working container" - think of them as a starting point to attach mounts and commands. Check it out here:
 
 ```bash
-buildah containers
+[root@bastion ~]# buildah containers
+CONTAINER ID  BUILDER  IMAGE ID     IMAGE NAME                       CONTAINER NAME
+77856ec69ac0     *     b096626d71c9 registry.access.redhat.com/ub... ubi9-working-container
 ```
 
 Now, we can mount the image source. In effect, this will trigger the graph driver to do its magic, pull the image layers together, add a working copy-on-write layer, and mount it so that we can access it just like any directory on the system:
 
 ```bash
-buildah mount ubi8-working-container
+buildah mount ubi9-working-container
 ```
 
 Now, lets add a single file to the new container image layer. The Buildah mount command can be ran again to get access to the right directory:
 
 ```bash
-echo "hello world" > $(buildah mount ubi8-working-container)/etc/hello.conf
+echo "hello world" > $(buildah mount ubi9-working-container)/etc/hello.conf
 ```
 
-Lets analyze what we just did. It's super simple, but kind of mind bending if you come from using other container engines. First, list the directory in the copy-on-write layer:
+Lets analyze what we just did. It's super simple, but kind of mind-bending if you come from using other container engines. First, list the directory in the copy-on-write layer:
 
 ```bash
-ls -alh $(buildah mount ubi8-working-container)/etc/
+ls -alh $(buildah mount ubi9-working-container)/etc/
 ```
 
-You should see hello.conf right there. Now, cat the file:
+You should see `hello.conf` right there. Now, cat the file:
 
 ```bash
-cat $(buildah mount ubi8-working-container)/etc/hello.conf
+cat $(buildah mount ubi9-working-container)/etc/hello.conf
 ```
 
-You should see the text you expect. Now, lets commit this copy-on-write layer as a new image layer:
+You should see the text you expect. Now, let's commit this copy-on-write layer as a new image layer:
 
 ```bash
-buildah commit ubi8-working-container ubi8-hello
+buildah commit ubi9-working-container ubi9-hello
 ```
 
 Now, we can see the new image layer in our local cache. We can view it with either Podman or Buildah (or CRI-O for that matter, they all use the same image store):
@@ -344,6 +354,8 @@ When we are done, we can clean up our environment quite nicely. The following co
 
 ```bash
 buildah delete -a
+buildah containers
+# No items in the list
 ```
 
 But, we still have the new image layer just how we want it. This could be pushed to a registry server to be shared with others if we like:
@@ -356,7 +368,7 @@ buildah images
 podman images
 ```
 
-### Using Tools Outside The Container
+### Working with Scratch Images (and Using Tools Outside The Container)
 
 Create a new working container, mount the image, and get a working copy-on-write layer:
 
@@ -374,14 +386,22 @@ ls -alh $WORKING_MOUNT
 Now, lets install some basic tools (don't worry about the entitlement errors):
 
 ```bash
-dnf install --installroot $WORKING_MOUNT bash coreutils --releasever 8 --setopt install_weak_deps=false -y
-dnf clean all -y --installroot $WORKING_MOUNT --releasever 8
+dnf install --installroot $WORKING_MOUNT bash coreutils --releasever 9 --setopt install_weak_deps=false -y
+dnf clean all -y --installroot $WORKING_MOUNT --releasever 9
 ```
 
 Verify that some files have been added:
 
 ```bash
 ls -alh $WORKING_MOUNT
+```
+
+Verify the name of the Buildah working container
+
+```bash
+[root@bastion ~]# buildah containers
+CONTAINER ID  BUILDER  IMAGE ID     IMAGE NAME                       CONTAINER NAME
+f8bccac23af0     *                  scratch                          working-container
 ```
 
 Now, commit the copy-on-write layer as a new container image layer:
@@ -394,6 +414,7 @@ Now, test the new image layer, by creating a container:
 
 ```bash
 podman run -it minimal bash
+# bash-5.1#  
 ```
 
 ```bash
@@ -410,7 +431,11 @@ buildah delete -a
 
 ### External Build Time Mounts
 
-As a final example, let's use a build time mount to show how we can pull data in. This will represent some sort of cached data that we are using outside of the container. This could be a repository of Ansible Playbooks, or even Database test data:
+As a final example, let's use a build time mount to show how we can pull data in. This will represent some sort of cached data that we are using outside of the container. This could be a repository of Ansible Playbooks, or even database test data:
+
+> [!TIP]
+> The `/dev/zero` directory can be used to create large test files quickly.
+> For example, `dd if=/dev/zero of=output.img` bs=1M count=1024 creates a 1GB file named output.img filled with zeros.
 
 ```bash
 mkdir ~/data
@@ -421,27 +446,29 @@ ls -alh ~/data/test.bin
 Now, lets fire up a working container:
 
 ```bash
-buildah from ubi8
-buildah mount ubi8-working-container
+buildah from ubi9
+buildah mount ubi9-working-container
 ```
 
-To consume the data within the container, we use the `buildah-run` subcommand. Notice that it takes the `-v` option just like "run" in Podman. We also use the Z option to relabel the data for SELinux. The `dd` command simply represents consuming some smaller portion of the data during the build process:
+To consume the data within the container, we use the `buildah-run` subcommand. Notice that it takes the `-v` (volume) option just like "run" in Podman. We also use the `Z` option to relabel the data for SELinux. The `dd` command simply represents consuming some smaller portion of the data during the build process:
 
 ```bash
-buildah run -v ~/data:/data:Z ubi8-working-container dd if=/data/test.bin of=/etc/small-test.bin bs=100 count=2
+buildah run -v ~/data:/data:Z ubi9-working-container dd if=/data/test.bin of=/etc/small-test.bin bs=100 count=2
 ```
+
+You will now find a new file, representing a smaller chunk of the `test.bin` file in the working container at `$(buildah mount ubi9-working-container)/etc/small-test.bin`.
 
 Commit the new image layer and clean things up:
 
 ```bash
-buildah commit ubi8-working-container ubi8-data
+buildah commit ubi9-working-container ubi9-data
 buildah delete -a
 ```
 
 Test it and note that we only kept the pieces of the data that we wanted. This is just an example, but imagine using this with a Makefile cache, or Ansible playbooks, or even a copy of production database data which needs to be used to test the image build or do a schema upgrade, which must be accessed during the image build process. There are tons of places where you need to access data, only at build time, but don't want it during production deployment:
 
 ```bash
-podman run -it ubi8-data ls -alh /etc/small-test.bin
+podman run -it ubi9-data ls -alh /etc/small-test.bin
 ```
 
 ### Cleanup
@@ -462,16 +489,34 @@ Now, lets move on to sharing containers with Skopeo...
 
 ## Skopeo: Moving & Sharing
 
-In this step, we are going to do a couple of simple exercises with Skopeo to give you a feel for what it can do. Skopeo doesn't need to interact with the local container storage (.local/share/containers), it can move directly between registries, between container engine storage, or even directories.
+In this step, we are going to do a couple of simple exercises with Skopeo to give you a feel for what it can do. Skopeo doesn't need to interact with the local container storage (`.local/share/containers`), it can move directly between registries, between container engine storage, or even directories.
 
 ### Remotely Inspecting Images
 
-First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image remotely before pulling it down to the local cache. This allows us to inspect the metadata of the image and see if we really want to use it, without synchronizing it to the local image cache:
+First, lets start with the use case that kicked off the Skopeo project. Sometimes, it's really convenient to inspect an image **remotely** before pulling it down to the local cache. This allows us to inspect the metadata of the image and see if we really want to use it, without synchronizing it to the local image cache:
 
 ```bash
 sudo dnf install skopeo
-
 skopeo inspect docker://registry.fedoraproject.org/fedora
+```
+
+```json
+...
+"Labels": {
+        "io.buildah.version": "1.41.4",
+        "license": "MIT",
+        "name": "fedora",
+        "org.opencontainers.image.license": "MIT",
+        "org.opencontainers.image.name": "fedora",
+        "org.opencontainers.image.url": "https://fedoraproject.org/",
+        "org.opencontainers.image.vendor": "Fedora Project",
+        "org.opencontainers.image.version": "42",
+        "vendor": "Fedora Project",
+        "version": "42"
+    },
+    "Architecture": "amd64",
+    "Os": "linux",
+...
 ```
 
 We can easily see the "Architecture" and "Os" metadata which tells us a lot about the image. We can also see the labels, which are consumed by most container engines, and passed to the runtime to be constructed as environment variables. By comparison, here's how to see this metadata in a running container:
@@ -488,6 +533,9 @@ Like, Podman, Skopeo can be used to pull images down into the local container st
 ```bash
 skopeo copy docker://registry.fedoraproject.org/fedora containers-storage:fedora
 ```
+
+> [!NOTE]
+> `containers-storage` is one of several "transports" that Skopeo support. Other options include `dir:`, `oci:/`, `docker://` - see `skopeo copy --help` for more information.
 
 But, it can also be used to pull them into a local directory:
 
@@ -542,12 +590,6 @@ skopeo copy docker://registry.fedoraproject.org/fedora docker://quay.io/fatherli
 
 This command just synchronized the fedora repository from the Fedora Registry to Quay.io without ever caching it in the local container storage. Very cool right?
 
-<!-- Finally, exit the ''rhel'' user because we need root for the next lab:
-
-```
-exit
-``` -->
-
 ### Conclusions
 
 You have a new tool in your tool belt for sharing and moving containers. Hopefully, you find other uses for Skopeo.
@@ -589,7 +631,7 @@ To understand CRIU, you need to understand step 6. When this step is executed, P
 So, in a nutshell, CRIU gives you more flexibility with containerized processes. Let's see it in action. First, start a simple container which generates incrementing numbers so that we can verify memory contents are really restored:
 
 ```
-podman run -d --name looper ubi8 /bin/sh -c \
+podman run -d --name looper ubi9 /bin/sh -c \
          'i=0; while true; do echo $i; i=$(expr $i + 1); sleep 1; done'
 ```
 
@@ -647,7 +689,7 @@ The default Containers SELinux policy does a really good job Podman in RHEL 8. M
 For example, run the following container:
 
 ```
-podman run --name home-test -v /home/:/home:ro -it ubi8 ls /home
+podman run --name home-test -v /home/:/home:ro -it ubi9 ls /home
 ```
 
 The above command will fail because the default SELinux policy does not allow containers to mount /home as read only. We can verify that there are no allow rules which permit this command to be executed:
@@ -677,7 +719,7 @@ semodule -i home_test.cil /usr/share/udica/templates/{base_container.cil,home_co
 Now, run the same type of container again, but pass it a security option telling it to label the process to use our new custom policy, and it will execute without being blocked. First start the contaier:
 
 ```
-podman run --name home-test-2 --security-opt label=type:home_test.process -v /home/:/home:ro -id ubi8 bash
+podman run --name home-test-2 --security-opt label=type:home_test.process -v /home/:/home:ro -id ubi9 bash
 ```
 
 Execute the ''ls'' command:
@@ -716,15 +758,15 @@ Before we begin the lab, download the latest OVAL data from Red Hat Product Secu
 wget https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2
 ```
 
-Now, we're going to use the oscap-podman tool to consume the data and compare some versions of the Red Hat Universal Base Image which we have stored locally in the Podman cache. Container images age like cheese, not like wine. Older container images which haven't been rebuilt will build up CVEs over time. From the Red Hat Ecosystem Catalog, we can see that the [UBI 8.0-126 image](https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e?tag=8.0-126&push_date=1560882955000) which was build June 11th, 2019 has a grade of F and at the time of this writing had 3 important security vulnerabilities.
+Now, we're going to use the oscap-podman tool to consume the data and compare some versions of the Red Hat Universal Base Image which we have stored locally in the Podman cache. Container images age like cheese, not like wine. Older container images which haven't been rebuilt will build up CVEs over time. From the Red Hat Ecosystem Catalog, we can see that the [UBI 8.0-126 image](https://catalog.redhat.com/software/containers/ubi9/ubi/5c359854d70cc534b3a3784e?tag=8.0-126&push_date=1560882955000) which was build June 11th, 2019 has a grade of F and at the time of this writing had 3 important security vulnerabilities.
 
-Check it out here: [UBI 8.0-126 image](https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e?tag=8.0-126&push_date=1560882955000)
+Check it out here: [UBI 8.0-126 image](https://catalog.redhat.com/software/containers/ubi9/ubi/5c359854d70cc534b3a3784e?tag=8.0-126&push_date=1560882955000)
 
 Now, let's take a more detailed look, using the oscap-podman command:
 
 ```
 sudo dnf install -y openscap-utils
-oscap-podman registry.access.redhat.com/ubi8/ubi:8.0-126 oval eval --report ./assets/html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
+oscap-podman registry.access.redhat.com/ubi9/ubi:8.0-126 oval eval --report ./assets/html/ubi-8.0-126-report.html rhel-8.oval.xml.bz2
 ```
 
 This will create a report. We've already set up a web server (in a container) so that you can quickly look at the  *OSCAP Report 8.0-126* Tab.
@@ -732,7 +774,7 @@ This will create a report. We've already set up a web server (in a container) so
 Notice that there are many orange lines displaying the CVEs/RHSAs. If you built and ran an application on this very old container image, it would be exposed to these vulnerabilities. Now, let's scan the latest version of UBI provided by Red Hat:
 
 ```
-oscap-podman registry.access.redhat.com/ubi8/ubi:latest oval eval --report ./assets/html/ubi-latest-report.html rhel-8.oval.xml.bz2
+oscap-podman registry.access.redhat.com/ubi9/ubi:latest oval eval --report ./assets/html/ubi-latest-report.html rhel-8.oval.xml.bz2
 ```
 
 Look at the new report from thr *OSCAP Report latest* Tab.

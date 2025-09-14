@@ -414,6 +414,11 @@ There are [plenty of examples](https://www.infoworld.com/article/2255759/deep-co
 
 From a security perspective, it's much better to remotely inspect and determine if we trust an image before we download it, expand it, and cache it in the local storage of our container engine. Every time we download an image, and expose it to the graph driver in the container engine, we expose ourselves to potential attack. First, let's do a remote inspect with **Skopeo** (can't do that with Podman because of the client/server nature):
 
+> [!NOTE]
+> **What *is* the graph driver?** When the end user specifies the Tag of a container image to run - by default this is the latest Tag - the graph driver unpacks all of the dependent Image Layers necessary to construct the data in the selected Tag. The graph driver is the piece of software that maps the necessary image layers in the Repository to a piece of local storage. The container image layers can be mapped to a directory using a driver like Overlay2 or in block storage using a driver like Device Mapper. Drivers include: aufs, devicemapper, btrfs, zfs, and overlayfs.
+
+When the container is started, the image layers are mounted read-only with a kernel namespace. The Image Layers from the Repository are always mounted read only but by default, a separate copy-on-write layer is also set up. This allows the containerized process to write data within the container. When data is written, it is stored in the copy-on-write layer, on the underlying host. This copy-on-write layer can be disabled by running the container with an option such as --readonly.
+
 ```bash
 sudo dnf install -y skopeo
 skopeo inspect docker://registry.fedoraproject.org/fedora
@@ -510,7 +515,7 @@ Ubuntu provides information at a similar quality to Fedora, but again does not m
 
 ##### Red Hat Enterprise Linux
 ```bash
-podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 yum updateinfo security
+podman run -it registry.access.redhat.com/ubi9/ubi:9.4-947 dnf updateinfo security
 ```
 
 Regrettably, we do not have the active Red Hat subscriptions necessary to analyze the Red Hat Universal Base Image (UBI) on the command line, but the output would look more like the following if we did:
