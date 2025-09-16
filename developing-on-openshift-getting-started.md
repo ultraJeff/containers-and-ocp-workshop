@@ -482,7 +482,7 @@ For instance, searching Helm Charts for [NGINX](https://nginx.com) will give a l
 
 By default the list of available repositories is empty. You can add a new one with the CLI or through the OpenShift Console. Let's add the Bitnami repository through the OpenShift Console now.
 
-Start by going to "Helm" in the left hand menu of the OpenShift Console and then choosing the "Repositories" tab. Click the blue "Create" button in the top right corner of this page and choose "Respository" from the dropdown.
+Start by going to "Helm" in the left hand menu of the OpenShift Console and then choosing the "Repositories" tab. Click the blue "Create" button in the top right corner of this page and choose "Repository" from the dropdown.
 
 ![Helm on OpenShift Console](./assets/images/helm-1.png)
 
@@ -496,7 +496,7 @@ And now you will be dropped back on the **+Add** page. From here, find "Helm Cha
 
 ![Helm on OpenShift Console](./assets/images/helm-3.png)
 
-Now check the Bitnami box to discover all of the Bitnami charts provided through this new Helm respository!
+Now check the Bitnami box to discover all of the Bitnami charts provided through this new Helm repository!
 
 ![Helm on OpenShift Console](./assets/images/helm-4.png)
 
