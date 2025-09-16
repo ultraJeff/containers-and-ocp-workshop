@@ -100,7 +100,7 @@ You can easily scale the number of running instances (pods) of your application.
 
 ![alt text](./assets/images/image-1.png)
 
-You now have two instances of the Node.js application running. But how does Kuberntes know which one to route traffic to?
+You now have two instances of the Node.js application running. But how does Kubernetes know which one to route traffic to?
 
 > [!IMPORTANT]
 > **Understanding Networking: Services and Routes**

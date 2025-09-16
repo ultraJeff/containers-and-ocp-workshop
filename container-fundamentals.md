@@ -450,7 +450,7 @@ curl -I https://registry.fedoraproject.org
 Since you are on a Red Hat Enterprise Linux box with the right keys, the output should look like this:
 
 ```bash
-HTTP/2 200 
+HTTP/2 200
 date: Thu, 11 Sep 2025 23:26:44 GMT
 content-type: text/html; charset=utf-8
 content-length: 78132
@@ -469,7 +469,7 @@ You can also discern that the certicate is valid and managed by Red Hat, which h
 curl 2>&1 -kvv https://registry.fedoraproject.org | grep subject
 ```
 
-Think carefully about what we just did. Even visually validating the certificate gives us some minimal level of trust in this registry server. In a real world scenario, rememeber that it's the container engine's job to check these certificates. That means that Systems Administrators need to distribute the appropriate CA certificates in production.
+Think carefully about what we just did. Even visually validating the certificate gives us some minimal level of trust in this registry server. In a real world scenario, remember that it's the container engine's job to check these certificates. That means that Systems Administrators need to distribute the appropriate CA certificates in production.
 
 Now that we have inspected the certificate, we can safely pull the trusted repository (because we trust the Fedora project built it right) from the trusted registry server (because we know it is managed by Fedora/Red Hat):
 
@@ -489,7 +489,7 @@ First, let's start with what we already know: there is often a full functioning 
 
 To analyze the quality, we are going to leverage existing tools - which is another advantage of consuming container images based on a Linux distro. To demonstrate, let's examine images from four different Linux distros - Fedora, Ubuntu, and Red Hat Enterprise Linux. Each will provide differing levels of information:
 
-<!-- TODO: Sort out Centos Stream change -->
+<!-- TODO: Sort out CentOS Stream change -->
 <!-- ##### CentOS
 
 ```bash
@@ -560,19 +560,19 @@ The Fedora registry is based on Quay.io and provides a list of container images 
 ##### Docker Hub
 - Click: [https://hub.docker.com/_/centos/](https://hub.docker.com/_/centos/)
 
-DockerHub provides "official" images for a lot of different pieces of software including things like CentOS, Ubuntu, Wordpress, and PHP. That said, there really isn't standard definition for what "official" means. Each repository appears to have their own processes, rules, time lines, lifecycles, and testing. There really is no shared understanding what official images provide an end user. Users must evaluate each repository for themselves and determine whether they trust that it's connected to the upstream project in any meaningful way.
+Docker Hub provides "official" images for a lot of different pieces of software including things like CentOS, Ubuntu, Wordpress, and PHP. That said, there really isn't standard definition for what "official" means. Each repository appears to have their own processes, rules, time lines, lifecycles, and testing. There really is no shared understanding what official images provide an end user. Users must evaluate each repository for themselves and determine whether they trust that it's connected to the upstream project in any meaningful way.
 
 <!-- TODO Update Bitnami since VMWare takeover -->
 <!-- ##### Bitnami
 - Click: [https://bitnami.com/containers](https://bitnami.com/containers)
 
-Similar to DockerHub, there is not a lot of information linking these repostories to the upstream projects in any meaningful way. There is not even a clear understanding of what tags are available, or should be used. Again, no policy information and users are pretty much left to sift through GitHub repositories to have any understanding of how they are built of if there is any lifecycle guarantees about versions. You are pretty much left to just trusting that Bitnami builds containers the way you want them... -->
+Similar to Docker Hub, there is not a lot of information linking these repostories to the upstream projects in any meaningful way. There is not even a clear understanding of what tags are available, or should be used. Again, no policy information and users are pretty much left to sift through GitHub repositories to have any understanding of how they are built of if there is any lifecycle guarantees about versions. You are pretty much left to just trusting that Bitnami builds containers the way you want them... -->
 
 
 ##### Red Hat Container Catalog
 - Click: [https://catalog.redhat.com](https://catalog.redhat.com/en/software/containers/ubi9/618326f8c0d15aff4912fe0b?image=686e9e544bbe88120c406c61&architecture=arm64)
 
-The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each respository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known vulnerabilities. That's because container images age like cheese, not like wine. Trust is fleeting and older container images age just like servers which are rarely or never patched.
+The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each repository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known vulnerabilities. That's because container images age like cheese, not like wine. Trust is fleeting and older container images age just like servers which are rarely or never patched.
 
 Now take a look at the Container Health Index scoring for each tag that is available. Notice, that the newer the tag, the better the letter grade. The Red Hat Container Catalog and Container Health Index clearly show you that the newer images have a less vulnerabiliites and hence have a better letter grade. To fully understand the scoring criteria, check out [Knowledge Base Article](https://access.redhat.com/articles/2803031). This is a completely unique capability provided by the Red Hat Container Catalog because container image Errata are produced tying container images to CVEs.
 
