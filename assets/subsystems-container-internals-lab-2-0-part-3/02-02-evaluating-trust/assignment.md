@@ -88,10 +88,10 @@ Now, that we have taken a look at several container images, we are going to star
 The Fedora registry provides a very basic experience. You know that it is operated by the Fedora project, so the security should be pretty similar to the ISOs you download. That said, there are no older versions of images, and there is really no stated policy about how often the images are patched, updated, or released.
 
 
-## DockerHub
+## Docker Hub
 - Click: [https://hub.docker.com/_/centos/](https://hub.docker.com/_/centos/)
 
-DockerHub provides "official" images for a lot of different pieces of software including things like CentOS, Ubuntu, Wordpress, and PHP. That said, there really isn't standard definition for what "official" means. Each repository appears to have their own processes, rules, time lines, lifecycles, and testing. There really is no shared understanding what official images provide an end user. Users must evaluate each repository for themselves and determine whether they trust that it's connected to the upstream project in any meaningful way.
+Docker Hub provides "official" images for a lot of different pieces of software including things like CentOS, Ubuntu, Wordpress, and PHP. That said, there really isn't standard definition for what "official" means. Each repository appears to have their own processes, rules, time lines, lifecycles, and testing. There really is no shared understanding what official images provide an end user. Users must evaluate each repository for themselves and determine whether they trust that it's connected to the upstream project in any meaningful way.
 
 ## Bitnami
 - Click: [https://bitnami.com/containers](https://bitnami.com/containers)
@@ -102,8 +102,8 @@ Similar to podmanHub, there is not a lot of information linking these repostorie
 ## Red Hat Container Catalog
 - Click: [https://access.redhat.com/containers](https://access.redhat.com/containers/#/registry.access.redhat.com/ubi7/ubi)
 
-The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each respository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known
- vulnerabilities. That's because container images age like cheese, not like wine. Trust is termporal and older container images age just like servers which are rarely or never patched.
+The Red Hat Container catalog is setup in a completely different way than almost every other registry server. There is a tremendous amount of information about each repository. Poke around and notice how this particular image has a warning associated. For the point of this exercise, we are purposefully looking at an older image with known
+ vulnerabilities. That's because container images age like cheese, not like wine. Trust is temporal and older container images age just like servers which are rarely or never patched.
 
 Now take a look at the Container Health Index scoring for each tag that is available. Notice, that the newer the tag, the better the letter grade. The Red Hat Container Catalog and Container Health Index clearly show you that the newer images have a less vulnerabiliites and hence have a better letter grade. To fully understand the scoring criteria, check out [Knowledge Base Article](https://access.redhat.com/articles/2803031). This is a compeltely unique capability provided by the Red Hat Container Catalog because container image Errata are produced tying container images to CVEs.
 
